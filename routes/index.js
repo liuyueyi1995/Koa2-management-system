@@ -109,62 +109,54 @@ router.get('/logout', async function (ctx, next) {
 
 
 /**------------------------------------------------------------- */
-// 应用角色管理页
-router.get('/user_app', async function (ctx, next) {
-  //var appRole = await model.AppRoles.fetchAll(); //获取所有应用角色的列表
-  var results = await model.Users.forge().fetchAll({withRelated:['approle','dbrole']});
-  
-  var relations = {};
-  for(var i = 0;i < results.length;i++){
-    relations[i] = {
-      'id': i + 1,
-      'username':results.models[i].attributes.username,
-      'approle':results.models[i].relations.approle.attributes.rolename
-    };
+// 用户管理页
+router.get('/user_manage', async function (ctx, next) {
+  var origin_results = await model.Users.fetchAll();
+  var results = {};
+  for(var i = 0;i < origin_results.length;i++){
+    results[i] = origin_results.models[i].attributes;
   }
-  console.log(relations);
-  await ctx.render('user_app', {
-    title: 'EVA管理平台-应用角色管理',
-    relations: relations
+  await ctx.render('user_manage', {
+    title: 'EVA管理平台-用户管理',
+    results: results
   });
 });
 
-// 数据库角色管理页
-router.get('/user_db', async function (ctx, next) {
-  var results = await model.Users.forge().fetchAll({withRelated:['approle','dbrole']});
-  
-  var relations = {};
-  for(var i = 0;i < results.length;i++){
-    relations[i] = {
-      'id': i + 1,
-      'username':results.models[i].attributes.username,
-      'dbrole':results.models[i].relations.dbrole.attributes.rolename
-    };
-  }
-  console.log(relations);
-  await ctx.render('user_db', {
-    title: 'EVA管理平台-数据库角色管理',
-    relations: relations
+
+router.get('/role_manage', async function (ctx, next) {
+  await ctx.render('role_manage', {
+    title: 'EVA管理平台-数据导入'
   });
 });
 
+router.get('/study_manage', async function (ctx, next) {
+  await ctx.render('study_manage', {
+    title: 'EVA管理平台-数据导入'
+  });
+});
+
+router.get('/site_manage', async function (ctx, next) {
+  await ctx.render('site_manage', {
+    title: 'EVA管理平台-数据导入'
+  });
+});
 
 /**------------------------------------------------------------- */
-// WAF日志查看
-router.get('/waf_log', async function (ctx, next) {
-  var wafLogs = await model.WafLogs.fetchAll();//从数据库中查询所有的日志信息
+// 日志管理
+router.get('/log_manage', async function (ctx, next) {
+  var origin_logs = await model.Logs.fetchAll();//从数据库中查询所有的日志信息
   var logs = {};
-  for(var i = 0;i < wafLogs.length;i++){
-    logs[i] = wafLogs.models[i].attributes;
+  for(var i = 0;i < origin_logs.length;i++){
+    logs[i] = origin_logs.models[i].attributes;
   }
-  await ctx.render('waf_log', {
+  await ctx.render('log_manage', {
     title: 'EVA管理平台-waf日志',
     logs: logs
   });
 });
 
-// 采用AJAX处理对waf_log表的搜索
-router.post('/waf_log',async function(ctx,next) {
+// 采用AJAX处理对logs表的搜索
+router.post('/log_manage',async function(ctx,next) {
   var logs = {};
   var len = 0;
   var content = ctx.request.body.content;
@@ -203,5 +195,16 @@ router.post('/waf_log',async function(ctx,next) {
   ctx.body = {logs,len};
 });
 
+router.get('/import', async function (ctx, next) {
+  await ctx.render('import', {
+    title: 'EVA管理平台-数据导入'
+  });
+});
+
+router.get('/settings', async function (ctx, next) {
+  await ctx.render('settings', {
+    title: 'EVA管理平台-相关设置'
+  });
+});
 
 module.exports = router;

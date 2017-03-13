@@ -1,0 +1,87 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+    script.
+      $(function (){
+        $(document).ready(function(){
+          $('.btn-search').click(search);
+        });
+      });
+      function search() {
+        let content = $('#searchBox').val();
+        if (content) {
+          $.post('/user_manage',{content:content},function(result){
+            let length = result.len;
+            if ($.isEmptyObject(result.logs)) { //如果没有查询到数据则返回提示
+              alert(`
+              No result matched the given condition!
+
+              Please retry!`);
+            } else { //如果查询到数据则动态生成表格               
+              let tbody = $('tbody');
+              tbody.html("");
+              for (var i = 0;i<length;i++) {
+                let tr = $('<tr></tr>');
+                tr.appendTo(tbody);
+                $('<td></td>').text(result.logs[i].id).appendTo(tr);
+                $('<td></td>').text(result.logs[i].time).appendTo(tr);
+                $('<td></td>').text(result.logs[i].username).appendTo(tr);
+                $('<td></td>').text(result.logs[i].function).appendTo(tr);
+                $('<td></td>').text(result.logs[i].url).appendTo(tr);
+                $('<td></td>').text(result.logs[i].param).appendTo(tr);
+                $('<td></td>').text(result.logs[i].result).appendTo(tr);
+              }
+            }
+          });
+        } else {
+          alert('There is no condition!');
+        }
+      }   
+
+  body
+    div.container
+      div.row
+        ul.list-inline
+          li.col-lg-3.nonpadding
+            p.content-title=title
+          li.col-lg-6.nonpadding
+          li.float-right.col-lg-3.nonpadding
+            div.input-group
+              span.input-group-btn
+                button.btn.btn-warning.btn-add(type='button') 添加新用户
+              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
+              span.input-group-btn
+                button.btn.btn-warning.btn-search(type='button') 搜索
+              
+      div.row
+        table.table
+          thead
+            tr
+              th 序号
+              th 邮箱
+              th 密码
+              th 姓名
+              th 手机号
+              th 单位地址
+              th 机构名称
+              th 职务
+              th 状态
+              th 创建日期
+              th 修改日期
+              th 修改
+              th 删除
+          tbody
+            each result in results
+              tr
+              each val in result
+                td.success #{val}
+              td.success 
+                button(type='button' class='btn btn-primary btn-xs btn-block') 修改
+              td.success 
+                button(type='button' class='btn btn-danger btn-xs btn-block') 删除
