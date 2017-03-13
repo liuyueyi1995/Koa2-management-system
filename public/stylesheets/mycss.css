@@ -1,0 +1,240 @@
+/**
+Author: liuyueyi0126@qq.com
+*/
+/*--对bootstrap的修改--*/
+.container {
+	margin:0;
+	padding:0;
+	width:100%;
+}
+.row {
+	margin:0;
+}
+.nav>li>a:hover,.nav>li>a:focus {
+	color:#f90;
+	background-color:#000;
+}
+.nav>li>a:active {
+	background-color:#000;
+	color:#f90;
+}
+.nav-pills>li.active>a,
+.nav-pills>li.active>a:focus,
+.nav-pills>li.active>a:hover{
+	color:#f90;
+	background-color:#000;
+}
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
+	color:#f90;
+	background-color:#000;
+}
+.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+    color: #f90;
+    text-decoration: none;
+    background-color: #000;
+}
+.dropdown-menu>li>a {
+	color:#fc0;
+}
+.dropdown-menu {
+	background-color:#000;
+}
+.list-inline {
+	margin-bottom:0;
+}
+a:focus,
+a:active:focus,
+a.active:focus,
+a.focus,
+a:active.focus,
+a.active.focus,
+.btn:focus,
+.btn:active:focus,
+.btn.active:focus,
+.btn.focus,
+.btn:active.focus,
+.btn.active.focus {
+    outline: none;          
+}
+/*--common css--*/
+body {
+	background:#333;
+	font-family:"微软雅黑" !important;
+}
+iframe {
+	width:100%;
+	height:550px;
+	border:none;
+}
+.nonpadding {
+	padding:0 !important;
+}
+.float-right {
+	text-align:right;
+	float:right;
+}
+.float-left {
+	text-align:left;
+	float:left;
+}
+
+/*--css of index--*/
+h1 {
+	margin-bottom:0;
+}
+.title {
+	font-size:38px;
+	color:#fc0;
+}
+.title2 {
+	font-size:32px;
+	color:#fc0;
+}
+.title3 {
+	font-size:10px;
+	color:#fc0;
+	padding:10px;
+	height:auto;
+}
+a.navitem {
+	color:#fc0;
+	background-color:#555;
+}
+
+
+/*--css of subpage--*/
+th {
+	color:#fff;
+	text-align:center;
+}
+td {
+	text-align:center;
+	padding:0;
+}
+p.content-title {
+	color:#fff;
+	text-align:center;
+	font-size:28px;
+}
+.float-right {
+	float:right;
+}
+.white {
+	color:#fff;
+}
+a.in-button {
+	text-decoration:none;
+}
+
+/*--css of login--*/
+.loginbox { 
+	width:480px; 
+	height:400px; 
+	float:right; 
+	background:transparent; 
+	padding:55px 70px;
+}
+.userbox { 
+	height:60px; 
+	background-color:#ffffff;
+	border:1px solid #acacac;
+	margin-top:28px; 
+	padding:10px 0;
+}
+.btnbox {
+	height:60px; 
+	background-color:#ffffff;
+	margin-top:28px;
+}
+.inputuser { 
+	width:250px; 
+	height:38px; 
+	border:0 none; 
+	padding:0;
+	margin:0; 
+	float:right; 
+	line-height:38px; 
+	font-size:16px;
+	outline:none;
+}
+.iconuser { 
+	width:64px; 
+	height:38px; 
+	background:url(../images/iconpeople.png) no-repeat center; 
+	float:left;
+	border-right:1px solid #c7c7c7;
+}
+.iconpass { 
+	width:64px;
+	height:38px; 
+	background:url(../images/iconsuo.png) no-repeat center; 
+	float:left;
+	border-right:1px solid #c7c7c7;
+}
+.submitbtn { 
+	width:100%; 
+	height:60px;
+	font-size:28px;
+	background:#39abea;
+	color:#fc0;
+}
+.submitbtn:hover {
+	background-color:#23527c;
+	color:#f90;
+}
+
+
+/* iCheck plugin Futurico skin
+----------------------------------- */
+.icheckbox_futurico,
+.iradio_futurico {
+    display: inline-block;
+    *display: inline;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    width: 16px;
+    height: 17px;
+    background: url(futurico.png) no-repeat;
+    border: none;
+    cursor: pointer;
+	color: white;
+}
+
+.icheckbox_futurico {
+    background-position: 0 0;
+}
+    .icheckbox_futurico.checked {
+        background-position: -18px 0;
+    }
+    .icheckbox_futurico.disabled {
+        background-position: -36px 0;
+        cursor: default;
+    }
+    .icheckbox_futurico.checked.disabled {
+        background-position: -54px 0;
+    }
+
+.iradio_futurico {
+    background-position: -72px 0;
+}
+    .iradio_futurico.checked {
+        background-position: -90px 0;
+    }
+    .iradio_futurico.disabled {
+        background-position: -108px 0;
+        cursor: default;
+    }
+    .iradio_futurico.checked.disabled {
+        background-position: -126px 0;
+    }
+
+/* HiDPI support */
+@media (-o-min-device-pixel-ratio: 5/4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi), (min-resolution: 1.25dppx) {
+    .icheckbox_futurico,
+    .iradio_futurico {
+        background-image: url(futurico@2x.png);
+        -webkit-background-size: 144px 19px;
+        background-size: 144px 19px;
+    }
+}

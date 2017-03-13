@@ -1,0 +1,30 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet', href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+  body
+    div.container
+      div.row
+        div.col-lg-4.nonpadding
+        div.col-lg-8.nonpadding
+          p.title=title
+      div.row
+        include alert.pug
+    div.loginbox
+      form(method='post')
+        div.userbox
+          div.iconuser
+          input#username.inputuser(name='username', tabindex='1', placeholder='请输入用户名', type='text', value='', size='25', autocomplete='false' required autofocus)
+        div.userbox
+          div.iconpass
+          input#password.inputuser(name='password', tabindex='2', placeholder='请输入密码', type='password', value='', size='25', autocomplete='false' required)
+        div.userbox
+          div.iconpass
+          input#password2.inputuser(name='password2', tabindex='3', placeholder='再输入密码', type='password', value='', size='25', autocomplete='false' required)
+        div.btnbox
+          input.submitbtn(type='submit', value='注册')

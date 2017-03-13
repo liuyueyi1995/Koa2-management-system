@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet', href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+    script(src='https://cdn.ravenjs.com/2.1.0/raven.min.js')
+    script(src='/js/oa.js')
+    script.
+      Raven.config('http://16843242dab34d0982fb8ead11779100@192.168.100.119:9000/8').install();
+      try {
+        
+      } catch(err) {
+        handleRouteError(err);
+      }
+      function handleRouteError(err) {
+        Raven.captureException(err);
+        Raven.showReportDialog();
+      };
+  body
+    block content
+    
