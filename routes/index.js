@@ -195,16 +195,18 @@ router.post('/user_manage',async function(ctx,next) {
     let ret = '添加成功！';
     ctx.body = {ret};
   } else if (ctx.request.body.action == 3) {
-    
     var id = ctx.request.body.content;
     var result = await model.Users.where('id','=',id).destroy(); 
     let ret = '删除成功！';
     ctx.body = {ret};
   } else if (ctx.request.body.action == 4) {
+    
     var content = ctx.request.body.content;
+    console.log(content);
     var hmac = crypto.createHmac('sha256', 'liuyueyi');
     var password = hmac.update(ctx.request.body.content['password']).digest('hex');
     var newUser = new model.Users({
+      id: ctx.request.body.content['id'],
       email: ctx.request.body.content['email'],
       password: password,
       name: ctx.request.body.content['name'],
@@ -214,7 +216,7 @@ router.post('/user_manage',async function(ctx,next) {
       title: ctx.request.body.content['title'],
       state: ctx.request.body.content['state']
     });
-    newUser.save({patch:true});
+    newUser.save();
     let ret = '修改成功！';
     ctx.body = {ret};
   }

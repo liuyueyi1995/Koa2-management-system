@@ -10,51 +10,29 @@ html
     script.
       $(function (){
         $(document).ready(function(){
-          $('.btn-search').click(search);
           $('.btn-add').click(add);
           $('.btn-delete').click(del);
+          $('.btn-search').click(search);
+          $('.btn-update').click(update);
+          $('.btn-upd').click(function() {
+            let origin_info = $(this).attr("data-result");
+            let info_obj = eval('('+origin_info+')'); //string to json
+            $('#id_upd').val(info_obj.id);
+            $('#email_upd').val(info_obj.email);
+            $('#name_upd').val(info_obj.name);
+            $('#phone_upd').val(info_obj.phone);
+            $('#address_upd').val(info_obj.address);
+            $('#site_upd').val(info_obj.site);
+            $('#title_upd').val(info_obj.title);
+            $('#state_upd').val(info_obj.state);
+          });
           $('.btn-del').click(function() {
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的用户?');
             $('#del_id').html($(this).attr("data-id"));
-          })
+          });
         });
       });
-      function search() {
-        let content = $('#searchBox').val();
-        if (content) {
-          $.post('/user_manage',{content:content,action:1},function(result){
-            let length = result.len;
-            if ($.isEmptyObject(result.users)) { //如果没有查询到数据则返回提示
-              alert(`
-              No result matched the given condition!
-
-              Please retry!`);
-            } else { //如果查询到数据则动态生成表格               
-              let tbody = $('tbody');
-              tbody.html("");
-              for (var i = 0;i<length;i++) {
-                let tr = $('<tr></tr>');
-                tr.appendTo(tbody);
-                $('<td></td>').text(result.users[i].id).appendTo(tr);
-                $('<td></td>').text(result.users[i].email).appendTo(tr);
-                $('<td></td>').text(result.users[i].name).appendTo(tr);
-                $('<td></td>').text(result.users[i].phone).appendTo(tr);
-                $('<td></td>').text(result.users[i].address).appendTo(tr);
-                $('<td></td>').text(result.users[i].site).appendTo(tr);
-                $('<td></td>').text(result.users[i].title).appendTo(tr);
-                $('<td></td>').text(result.users[i].state).appendTo(tr);
-                $('<td></td>').text(result.users[i].created_at).appendTo(tr);
-                $('<td></td>').text(result.users[i].updated_at).appendTo(tr);
-                $('<td><button class="btn btn-primary btn-xs btn-block btn-update" type="button">修改</button></td>').appendTo(tr);
-                $('<td><button class="btn btn-danger btn-xs btn-block btn-delete" type="button">删除</button></td>').appendTo(tr);
-                tr.addClass('success');
-              }
-            }
-          });
-        } else {
-          alert('There is no condition!');
-        }
-      }   
+        
       function add() {
         let email = $('#email').val();
         let password = $('#password').val();
@@ -145,6 +123,119 @@ html
           }
         );
       }
+      function search() {
+        let content = $('#searchBox').val();
+        if (content) {
+          $.post('/user_manage',{content:content,action:1},function(result){
+            let length = result.len;
+            if ($.isEmptyObject(result.users)) { //如果没有查询到数据则返回提示
+              alert(`
+              No result matched the given condition!
+
+              Please retry!`);
+            } else { //如果查询到数据则动态生成表格               
+              let tbody = $('tbody');
+              tbody.html("");
+              for (var i = 0;i<length;i++) {
+                let tr = $('<tr></tr>');
+                tr.appendTo(tbody);
+                $('<td></td>').text(result.users[i].id).appendTo(tr);
+                $('<td></td>').text(result.users[i].email).appendTo(tr);
+                $('<td></td>').text(result.users[i].name).appendTo(tr);
+                $('<td></td>').text(result.users[i].phone).appendTo(tr);
+                $('<td></td>').text(result.users[i].address).appendTo(tr);
+                $('<td></td>').text(result.users[i].site).appendTo(tr);
+                $('<td></td>').text(result.users[i].title).appendTo(tr);
+                $('<td></td>').text(result.users[i].state).appendTo(tr);
+                $('<td></td>').text(result.users[i].created_at).appendTo(tr);
+                $('<td></td>').text(result.users[i].updated_at).appendTo(tr);
+                $('<td><button class="btn btn-primary btn-xs btn-block btn-update" type="button">修改</button></td>').appendTo(tr);
+                $('<td><button class="btn btn-danger btn-xs btn-block btn-delete" type="button">删除</button></td>').appendTo(tr);
+                tr.addClass('success');
+              }
+            }
+          });
+        } else {
+          alert('There is no condition!');
+        }
+      } 
+      function update() {
+        let id = $('#id_upd').val();
+        let email = $('#email_upd').val();
+        let password = $('#password_upd').val();
+        let password_confirm = $('#password_confirm_upd').val();
+        let name = $('#name_upd').val();
+        let phone = $('#phone_upd').val();
+        let address = $('#address_upd').val();
+        let site = $('#site_upd').val();
+        let title = $('#title_upd').val();
+        let state = $('#state_upd').val();
+        if ($.trim(email) == '') {
+          $('#warning4').text('邮箱为必填项！');
+          return;
+        } else {
+          $('#warning4').text('');
+        }
+        if ($.trim(password) == '') {
+          $('#warning5').text('密码为必填项！');
+          return;
+        } else {
+          $('#warning5').text('');
+        } 
+        if ($.trim(password_confirm) == '') {
+          $('#warning6').text('请再次输入密码！');
+          return;
+        } else {
+          $('#warning6').text('');
+        } 
+        if ($.trim(name) == '') {
+          $('#warning7').text('姓名为必填项！');
+          return;
+        } else {
+          $('#warning7').text('');
+        }
+        if ($.trim(password)  != $.trim(password_confirm)) {
+          $('#warning5').text('两次输入密码不相同！');
+          $('#warning6').text('两次输入密码不相同！');
+        } else {
+          let newUser = {
+            "id":id,
+            "email":email,
+            "password":password,
+            "name":name,
+            "phone":phone,
+            "address":address,
+            "site":site,
+            "title":title,
+            "state":state
+          };
+          $.ajax(
+            {
+              url:'/user_manage',
+              data:{content:newUser,action:4},
+              type:"post",
+              beforeSend: function() {
+                $("#tips2").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips2").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips2').hide();
+              }
+            }
+          );
+          return false;
+        }
+      }
 
   body
     div.container
@@ -183,11 +274,70 @@ html
               each val in result
                 td.success #{val}
               td.success 
-                button(type='button' class='btn btn-primary btn-xs btn-block btn-update') 修改
+                - var info = result
+                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
-      
+      //修改用户的模态框
+      div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 修改用户信息
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 邮箱
+                  div.col-sm-7
+                    input.form-control#email_upd(type='text',placeholder='请输入邮箱(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning4(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 密码
+                  div.col-sm-7
+                    input.form-control#password_upd(type='password',placeholder='请输入密码(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning5(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 确认密码
+                  div.col-sm-7
+                    input.form-control#password_confirm_upd(type='password',placeholder='请再次输入密码(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning6(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 姓名
+                  div.col-sm-7
+                    input.form-control#name_upd(type='text',placeholder='请输入姓名(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning7(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 手机号
+                  div.col-sm-7
+                    input.form-control#phone_upd(type='text' placeholder='请输入手机号码',value='') 
+                div.form-group
+                  label.col-sm-2.control-label 单位地址
+                  div.col-sm-7
+                    input.form-control#address_upd(type='text' placeholder='请输入单位地址',value='')
+                div.form-group
+                  label.col-sm-2.control-label 机构名称
+                  div.col-sm-7
+                    input.form-control#site_upd(type='text' placeholder='请输入机构名称',value='')
+                div.form-group
+                  label.col-sm-2.control-label 职务
+                  div.col-sm-7
+                    input.form-control#title_upd(type='text' placeholder='请输入职务',value='')
+                div.form-group
+                  label.col-sm-2.control-label 状态
+                  div.col-sm-7
+                    input.form-control#state_upd(type='text' placeholder='请输入状态',value='')
+            div#id_upd(style="display:none") 存储待修改项的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-update(type='submit') 确认修改
+            span#tips2
+      //删除用户的模态框
       div.modal.fade#delete(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')
         div.modal-dialog
           div.modal-content
@@ -200,7 +350,7 @@ html
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
               button.btn.btn-danger.btn-delete(type='submit') 确认删除
             span#tips1
-
+      //添加用户的模态框
       div.modal.fade#add(tabindex='-1',role='dialog',aria-labelledby='addLabel',aria-hidden='true')
         div.modal-dialog
           div.modal-content
