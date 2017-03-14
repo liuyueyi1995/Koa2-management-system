@@ -194,6 +194,29 @@ router.post('/user_manage',async function(ctx,next) {
     newUser.save();
     let ret = '添加成功！';
     ctx.body = {ret};
+  } else if (ctx.request.body.action == 3) {
+    
+    var id = ctx.request.body.content;
+    var result = await model.Users.where('id','=',id).destroy(); 
+    let ret = '删除成功！';
+    ctx.body = {ret};
+  } else if (ctx.request.body.action == 4) {
+    var content = ctx.request.body.content;
+    var hmac = crypto.createHmac('sha256', 'liuyueyi');
+    var password = hmac.update(ctx.request.body.content['password']).digest('hex');
+    var newUser = new model.Users({
+      email: ctx.request.body.content['email'],
+      password: password,
+      name: ctx.request.body.content['name'],
+      phone: ctx.request.body.content['phone'],
+      address: ctx.request.body.content['address'],
+      site: ctx.request.body.content['site'],
+      title: ctx.request.body.content['title'],
+      state: ctx.request.body.content['state']
+    });
+    newUser.save({patch:true});
+    let ret = '修改成功！';
+    ctx.body = {ret};
   }
 });
 

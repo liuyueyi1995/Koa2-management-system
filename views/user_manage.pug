@@ -12,6 +12,11 @@ html
         $(document).ready(function(){
           $('.btn-search').click(search);
           $('.btn-add').click(add);
+          $('.btn-delete').click(del);
+          $('.btn-del').click(function() {
+            $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的用户?');
+            $('#del_id').html($(this).attr("data-id"));
+          })
         });
       });
       function search() {
@@ -51,7 +56,6 @@ html
         }
       }   
       function add() {
-        console.log('1');
         let email = $('#email').val();
         let password = $('#password').val();
         let name = $('#name').val();
@@ -114,6 +118,33 @@ html
           return false;
         }
       }
+      function del() {
+        let id = $(this).parent().prev().html();
+        $.ajax(
+          {
+            url:'/user_manage',
+            data:{content:id,action:3},
+            type:"post",
+            beforeSend: function() {
+              $("#tips1").html("<span style='color:blue'>正在处理...</span>");
+            },
+            success: function(result) {
+              if (result) {
+                alert(result.ret);
+                location.reload();
+              } else {
+                $("#tips1").html("<span style='color:blue'>出现错误！</span>");
+              }
+            },
+            error:function() {
+              alert('请求出错');
+            },
+            complete:function() {
+              $('#tips1').hide();
+            }
+          }
+        );
+      }
 
   body
     div.container
@@ -154,7 +185,22 @@ html
               td.success 
                 button(type='button' class='btn btn-primary btn-xs btn-block btn-update') 修改
               td.success 
-                button(type='button' class='btn btn-danger btn-xs btn-block btn-delete') 删除
+                - var id = result.id
+                button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
+      
+      div.modal.fade#delete(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 删除用户
+            div.modal-body#del_confirm 确认删除？
+            div#del_id(style="display:none") 存储待删除的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-danger.btn-delete(type='submit') 确认删除
+            span#tips1
+
       div.modal.fade#add(tabindex='-1',role='dialog',aria-labelledby='addLabel',aria-hidden='true')
         div.modal-dialog
           div.modal-content
