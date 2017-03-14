@@ -114,13 +114,89 @@ router.get('/user_manage', async function (ctx, next) {
   var origin_results = await model.Users.fetchAll();
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
-    results[i] = origin_results.models[i].attributes;
+    results[i] = {
+      "id":origin_results.models[i].attributes.id,
+      "email":origin_results.models[i].attributes.email,
+      "name":origin_results.models[i].attributes.name,
+      "phone":origin_results.models[i].attributes.phone,
+      "address":origin_results.models[i].attributes.address,
+      "site":origin_results.models[i].attributes.site,
+      "title":origin_results.models[i].attributes.title,
+      "state":origin_results.models[i].attributes.state,
+      "createdAt":origin_results.models[i].attributes.created_at,
+      "updatedAt":origin_results.models[i].attributes.updated_at,
+    }
   }
   await ctx.render('user_manage', {
     title: 'EVA管理平台-用户管理',
     results: results
   });
 });
+
+
+// 采用AJAX处理对users表的搜索
+router.post('/user_manage',async function(ctx,next) {
+  if (ctx.request.body.action == 1) {
+    var users = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var content1 = '%'+content+'%'; 
+    if (typeof(content) == Number) {
+      var result1 = await model.Users.where('id','=',content).fetchAll(); 
+      for(;len < result1.length;len++){
+        users[len] = result1.models[len].attributes;
+      }
+    }
+    var result2 = await model.Users.where('email','like',content1).fetchAll(); 
+    var result3 = await model.Users.where('name','like',content1).fetchAll(); 
+    var result4 = await model.Users.where('phone','like',content1).fetchAll(); 
+    var result5 = await model.Users.where('address','like',content1).fetchAll(); 
+    var result6 = await model.Users.where('site','like',content1).fetchAll(); 
+    var result7 = await model.Users.where('title','like',content1).fetchAll(); 
+    var result8 = await model.Users.where('state','like',content1).fetchAll();
+
+    for(;len < result2.length;len++){
+      users[len] = result2.models[len].attributes;
+    }
+    for(;len < result3.length;len++){
+      users[len] = result3.models[len].attributes;
+    }
+    for(;len < result4.length;len++){
+      users[len] = result4.models[len].attributes;
+    }
+    for(;len < result5.length;len++){
+      users[len] = result5.models[len].attributes;
+    }
+    for(;len < result6.length;len++){
+      users[len] = result6.models[len].attributes;
+    }
+    for(;len < result7.length;len++){
+      users[len] = result7.models[len].attributes;
+    }
+    for(;len < result8.length;len++){
+      users[len] = result8.models[len].attributes;
+    }
+    ctx.body = {users,len};
+  } else if (ctx.request.body.action == 2) {
+    var content = ctx.request.body.content;
+    var hmac = crypto.createHmac('sha256', 'liuyueyi');
+    var password = hmac.update(ctx.request.body.content['password']).digest('hex');
+    var newUser = new model.Users({
+      email: ctx.request.body.content['email'],
+      password: password,
+      name: ctx.request.body.content['name'],
+      phone: ctx.request.body.content['phone'],
+      address: ctx.request.body.content['address'],
+      site: ctx.request.body.content['site'],
+      title: ctx.request.body.content['title'],
+      state: ctx.request.body.content['state']
+    });
+    newUser.save();
+    let ret = '添加成功！';
+    ctx.body = {ret};
+  }
+});
+
 
 
 router.get('/role_manage', async function (ctx, next) {
@@ -150,7 +226,7 @@ router.get('/log_manage', async function (ctx, next) {
     logs[i] = origin_logs.models[i].attributes;
   }
   await ctx.render('log_manage', {
-    title: 'EVA管理平台-waf日志',
+    title: 'EVA管理平台-日志管理',
     logs: logs
   });
 });

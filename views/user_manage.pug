@@ -11,14 +11,15 @@ html
       $(function (){
         $(document).ready(function(){
           $('.btn-search').click(search);
+          $('.btn-add').click(add);
         });
       });
       function search() {
         let content = $('#searchBox').val();
         if (content) {
-          $.post('/user_manage',{content:content},function(result){
+          $.post('/user_manage',{content:content,action:1},function(result){
             let length = result.len;
-            if ($.isEmptyObject(result.logs)) { //如果没有查询到数据则返回提示
+            if ($.isEmptyObject(result.users)) { //如果没有查询到数据则返回提示
               alert(`
               No result matched the given condition!
 
@@ -29,13 +30,19 @@ html
               for (var i = 0;i<length;i++) {
                 let tr = $('<tr></tr>');
                 tr.appendTo(tbody);
-                $('<td></td>').text(result.logs[i].id).appendTo(tr);
-                $('<td></td>').text(result.logs[i].time).appendTo(tr);
-                $('<td></td>').text(result.logs[i].username).appendTo(tr);
-                $('<td></td>').text(result.logs[i].function).appendTo(tr);
-                $('<td></td>').text(result.logs[i].url).appendTo(tr);
-                $('<td></td>').text(result.logs[i].param).appendTo(tr);
-                $('<td></td>').text(result.logs[i].result).appendTo(tr);
+                $('<td></td>').text(result.users[i].id).appendTo(tr);
+                $('<td></td>').text(result.users[i].email).appendTo(tr);
+                $('<td></td>').text(result.users[i].name).appendTo(tr);
+                $('<td></td>').text(result.users[i].phone).appendTo(tr);
+                $('<td></td>').text(result.users[i].address).appendTo(tr);
+                $('<td></td>').text(result.users[i].site).appendTo(tr);
+                $('<td></td>').text(result.users[i].title).appendTo(tr);
+                $('<td></td>').text(result.users[i].state).appendTo(tr);
+                $('<td></td>').text(result.users[i].created_at).appendTo(tr);
+                $('<td></td>').text(result.users[i].updated_at).appendTo(tr);
+                $('<td><button class="btn btn-primary btn-xs btn-block btn-update" type="button">修改</button></td>').appendTo(tr);
+                $('<td><button class="btn btn-danger btn-xs btn-block btn-delete" type="button">删除</button></td>').appendTo(tr);
+                tr.addClass('success');
               }
             }
           });
@@ -43,6 +50,70 @@ html
           alert('There is no condition!');
         }
       }   
+      function add() {
+        console.log('1');
+        let email = $('#email').val();
+        let password = $('#password').val();
+        let name = $('#name').val();
+        let phone = $('#phone').val();
+        let address = $('#address').val();
+        let site = $('#site').val();
+        let title = $('#title').val();
+        let state = $('#state').val();
+        if ($.trim(email) == '') {
+          $('#warning1').text('邮箱为必填项！');
+          return;
+        } else {
+          $('#warning1').text('');
+        }
+        if ($.trim(password) == '') {
+          $('#warning2').text('密码为必填项！');
+          return;
+        } else {
+          $('#warning2').text('');
+        } 
+        if ($.trim(name) == '') {
+          $('#warning3').text('姓名为必填项！');
+          return;
+        } else {
+          $('#warning3').text('');
+          let newUser = {
+            "email":email,
+            "password":password,
+            "name":name,
+            "phone":phone,
+            "address":address,
+            "site":site,
+            "title":title,
+            "state":state
+          };
+          $.ajax(
+            {
+              url:'/user_manage',
+              data:{content:newUser,action:2},
+              type:"post",
+              beforeSend: function() {
+                $("#tips").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips').hide();
+              }
+            }
+          );
+          return false;
+        }
+      }
 
   body
     div.container
@@ -54,18 +125,17 @@ html
           li.float-right.col-lg-3.nonpadding
             div.input-group
               span.input-group-btn
-                button.btn.btn-warning.btn-add(type='button') 添加新用户
+                button.btn.btn-warning(type='button',data-toggle="modal",data-target="#add") 添加新用户
               input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
-              
+            
       div.row
         table.table
           thead
             tr
               th 序号
               th 邮箱
-              th 密码
               th 姓名
               th 手机号
               th 单位地址
@@ -82,6 +152,56 @@ html
               each val in result
                 td.success #{val}
               td.success 
-                button(type='button' class='btn btn-primary btn-xs btn-block') 修改
+                button(type='button' class='btn btn-primary btn-xs btn-block btn-update') 修改
               td.success 
-                button(type='button' class='btn btn-danger btn-xs btn-block') 删除
+                button(type='button' class='btn btn-danger btn-xs btn-block btn-delete') 删除
+      div.modal.fade#add(tabindex='-1',role='dialog',aria-labelledby='addLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 添加新用户
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 邮箱
+                  div.col-sm-7
+                    input.form-control#email(type='text',placeholder='请输入邮箱(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning1(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 密码
+                  div.col-sm-7
+                    input.form-control#password(type='password',placeholder='请输入密码(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning2(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 姓名
+                  div.col-sm-7
+                    input.form-control#name(type='text',placeholder='请输入姓名(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning3(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 手机号
+                  div.col-sm-7
+                    input.form-control#phone(type='text' placeholder='请输入手机号码',value='') 
+                div.form-group
+                  label.col-sm-2.control-label 单位地址
+                  div.col-sm-7
+                    input.form-control#address(type='text' placeholder='请输入单位地址',value='')
+                div.form-group
+                  label.col-sm-2.control-label 机构名称
+                  div.col-sm-7
+                    input.form-control#site(type='text' placeholder='请输入机构名称',value='')
+                div.form-group
+                  label.col-sm-2.control-label 职务
+                  div.col-sm-7
+                    input.form-control#title(type='text' placeholder='请输入职务',value='')
+                div.form-group
+                  label.col-sm-2.control-label 状态
+                  div.col-sm-7
+                    input.form-control#state(type='text' placeholder='请输入状态',value='')
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-add(type='submit') 确认添加
+            span#tips
