@@ -134,7 +134,7 @@ router.get('/user_manage', async function (ctx, next) {
 });
 
 
-// 采用AJAX处理对users表的搜索
+// 采用AJAX处理对前端发回的请求
 router.post('/user_manage',async function(ctx,next) {
   if (ctx.request.body.action == 1) {
     var users = {};
@@ -200,23 +200,17 @@ router.post('/user_manage',async function(ctx,next) {
     let ret = '删除成功！';
     ctx.body = {ret};
   } else if (ctx.request.body.action == 4) {
-    
     var content = ctx.request.body.content;
-    console.log(content);
-    var hmac = crypto.createHmac('sha256', 'liuyueyi');
-    var password = hmac.update(ctx.request.body.content['password']).digest('hex');
-    var newUser = new model.Users({
-      id: ctx.request.body.content['id'],
+    new model.Users({id: ctx.request.body.content['id']})
+    .save({
       email: ctx.request.body.content['email'],
-      password: password,
       name: ctx.request.body.content['name'],
       phone: ctx.request.body.content['phone'],
       address: ctx.request.body.content['address'],
       site: ctx.request.body.content['site'],
       title: ctx.request.body.content['title'],
       state: ctx.request.body.content['state']
-    });
-    newUser.save();
+    }, {patch: true});
     let ret = '修改成功！';
     ctx.body = {ret};
   }

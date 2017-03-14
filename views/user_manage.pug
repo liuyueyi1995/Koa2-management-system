@@ -36,6 +36,7 @@ html
       function add() {
         let email = $('#email').val();
         let password = $('#password').val();
+        let password_confirm = $('#password_confirm').val();
         let name = $('#name').val();
         let phone = $('#phone').val();
         let address = $('#address').val();
@@ -54,11 +55,22 @@ html
         } else {
           $('#warning2').text('');
         } 
-        if ($.trim(name) == '') {
-          $('#warning3').text('姓名为必填项！');
+        if ($.trim(password_confirm) == '') {
+          $('#warning3').text('请再次输入密码！');
           return;
         } else {
           $('#warning3').text('');
+        } 
+        if ($.trim(name) == '') {
+          $('#warning4').text('姓名为必填项！');
+          return;
+        } else {
+          $('#warning4').text('');
+        }
+        if ($.trim(password)  != $.trim(password_confirm)) {
+          $('#warning2').text('两次输入密码不相同！');
+          $('#warning3').text('两次输入密码不相同！');
+        } else {
           let newUser = {
             "email":email,
             "password":password,
@@ -162,8 +174,6 @@ html
       function update() {
         let id = $('#id_upd').val();
         let email = $('#email_upd').val();
-        let password = $('#password_upd').val();
-        let password_confirm = $('#password_confirm_upd').val();
         let name = $('#name_upd').val();
         let phone = $('#phone_upd').val();
         let address = $('#address_upd').val();
@@ -176,32 +186,14 @@ html
         } else {
           $('#warning4').text('');
         }
-        if ($.trim(password) == '') {
-          $('#warning5').text('密码为必填项！');
-          return;
-        } else {
-          $('#warning5').text('');
-        } 
-        if ($.trim(password_confirm) == '') {
-          $('#warning6').text('请再次输入密码！');
-          return;
-        } else {
-          $('#warning6').text('');
-        } 
         if ($.trim(name) == '') {
           $('#warning7').text('姓名为必填项！');
           return;
         } else {
           $('#warning7').text('');
-        }
-        if ($.trim(password)  != $.trim(password_confirm)) {
-          $('#warning5').text('两次输入密码不相同！');
-          $('#warning6').text('两次输入密码不相同！');
-        } else {
           let newUser = {
             "id":id,
             "email":email,
-            "password":password,
             "name":name,
             "phone":phone,
             "address":address,
@@ -266,7 +258,8 @@ html
               th 状态
               th 创建日期
               th 修改日期
-              th 修改
+              th 修改基本信息
+              th 修改密码
               th 删除
           tbody
             each result in results
@@ -275,17 +268,20 @@ html
                 td.success #{val}
               td.success 
                 - var info = result
-                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改
+                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改基本信息
+              td.success 
+                - var info = result
+                button(type='button' class='btn btn-info btn-xs btn-block btn-upd-password' data-result=info data-toggle="modal",data-target="#update_password") 修改密码
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
-      //修改用户的模态框
+      //修改用户基本信息的模态框
       div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
         div.modal-dialog
           div.modal-content
             div.modal-header
               button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
-              h4 修改用户信息
+              h4 修改用户基本信息
             div.modal-body 
               form.form-horizontal(role='form')
                 div.form-group
@@ -293,25 +289,13 @@ html
                   div.col-sm-7
                     input.form-control#email_upd(type='text',placeholder='请输入邮箱(必填)',value='',required)
                   div.col-sm-3
-                    p#warning4(style='color:#ff0000')
-                div.form-group
-                  label.col-sm-2.control-label 密码
-                  div.col-sm-7
-                    input.form-control#password_upd(type='password',placeholder='请输入密码(必填)',value='',required)
-                  div.col-sm-3
                     p#warning5(style='color:#ff0000')
-                div.form-group
-                  label.col-sm-2.control-label 确认密码
-                  div.col-sm-7
-                    input.form-control#password_confirm_upd(type='password',placeholder='请再次输入密码(必填)',value='',required)
-                  div.col-sm-3
-                    p#warning6(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 姓名
                   div.col-sm-7
                     input.form-control#name_upd(type='text',placeholder='请输入姓名(必填)',value='',required)
                   div.col-sm-3
-                    p#warning7(style='color:#ff0000')
+                    p#warning6(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 手机号
                   div.col-sm-7
@@ -372,11 +356,17 @@ html
                   div.col-sm-3
                     p#warning2(style='color:#ff0000')
                 div.form-group
+                  label.col-sm-2.control-label 确认密码
+                  div.col-sm-7
+                    input.form-control#password_confirm(type='password',placeholder='请再次输入密码(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning3(style='color:#ff0000')
+                div.form-group
                   label.col-sm-2.control-label 姓名
                   div.col-sm-7
                     input.form-control#name(type='text',placeholder='请输入姓名(必填)',value='',required)
                   div.col-sm-3
-                    p#warning3(style='color:#ff0000')
+                    p#warning4(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 手机号
                   div.col-sm-7
