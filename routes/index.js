@@ -213,6 +213,16 @@ router.post('/user_manage',async function(ctx,next) {
     }, {patch: true});
     let ret = '修改成功！';
     ctx.body = {ret};
+  } else if (ctx.request.body.action == 5) {
+    var content = ctx.request.body.content;
+    var hmac = crypto.createHmac('sha256', 'liuyueyi');
+    var password = hmac.update(ctx.request.body.content['password']).digest('hex');
+    new model.Users({id: ctx.request.body.content['id']})
+    .save({
+      password: password
+    }, {patch: true});
+    let ret = '修改密码成功！';
+    ctx.body = {ret};
   }
 });
 

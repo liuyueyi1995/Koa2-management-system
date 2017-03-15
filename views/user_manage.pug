@@ -7,14 +7,16 @@ html
     link(rel='stylesheet' href='/stylesheets/mycss.css')
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
     script.
       $(function (){
         $(document).ready(function(){
-          $('.btn-add').click(add);
-          $('.btn-delete').click(del);
-          $('.btn-search').click(search);
-          $('.btn-update').click(update);
-          $('.btn-upd').click(function() {
+          $('.btn-add').click(add); //模态框里的添加按钮 触发ajax
+          $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
+          $('.btn-search').click(search); //搜索栏的搜索按钮 触发ajax
+          $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
+          $('.btn-update-password').click(update_password); //模态框里的修改按钮 触发ajax
+          $('body').on('click','.btn-upd',function() { //表格里的修改基本信息按钮 将该行的信息写入模态框
             let origin_info = $(this).attr("data-result");
             let info_obj = eval('('+origin_info+')'); //string to json
             $('#id_upd').val(info_obj.id);
@@ -26,8 +28,14 @@ html
             $('#title_upd').val(info_obj.title);
             $('#state_upd').val(info_obj.state);
           });
-          $('.btn-del').click(function() {
+          $('body').on('click','.btn-upd-password',function() { //表格里的修改基本密码按钮 将该行对应的id传递给模态框
+            $('#upd_pass_id').html($(this).attr("data-id"));
+          });
+          $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
+            console.log(1);
+            alert('1');
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的用户?');
+            alert($(this).attr("data-id"));
             $('#del_id').html($(this).attr("data-id"));
           });
         });
@@ -161,8 +169,9 @@ html
                 $('<td></td>').text(result.users[i].state).appendTo(tr);
                 $('<td></td>').text(result.users[i].created_at).appendTo(tr);
                 $('<td></td>').text(result.users[i].updated_at).appendTo(tr);
-                $('<td><button class="btn btn-primary btn-xs btn-block btn-update" type="button">修改</button></td>').appendTo(tr);
-                $('<td><button class="btn btn-danger btn-xs btn-block btn-delete" type="button">删除</button></td>').appendTo(tr);
+                $('<td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result="' + result.users[i] + '">修改基本信息</button></td>').appendTo(tr);
+                $('<td><button class="btn btn-info btn-xs btn-block btn-upd-password" type="button" data-toggle="modal" data-target="#update_password" data-id="' + result.users[i].id + '">修改密码</button></td>').appendTo(tr);
+                $('<td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id="' + result.users[i].id + '">删除</button></td>').appendTo(tr);
                 tr.addClass('success');
               }
             }
@@ -228,6 +237,56 @@ html
           return false;
         }
       }
+      function update_password() {
+        let id = $(this).parent().prev().html();
+        let password = $('#password_upd').val();
+        let password_confirm = $('#password_confirm_upd').val();
+        if ($.trim(password) == '') {
+          $('#warning7').text('密码为必填项！');
+          return;
+        } else {
+          $('#warning7').text('');
+        } 
+        if ($.trim(password_confirm) == '') {
+          $('#warning8').text('请再次输入密码！');
+          return;
+        } else {
+          $('#warning8').text('');
+        } 
+        if ($.trim(password)  != $.trim(password_confirm)) {
+          $('#warning7').text('两次输入密码不相同！');
+          $('#warning8').text('两次输入密码不相同！');
+        } else {
+          let info = {
+            "id":id,
+            "password":password
+          };
+          $.ajax(
+            {
+              url:'/user_manage',
+              data:{content:info,action:5},
+              type:"post",
+              beforeSend: function() {
+                $("#tips3").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips3").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips3').hide();
+              }
+            }
+          );
+        }
+      }
 
   body
     div.container
@@ -270,11 +329,37 @@ html
                 - var info = result
                 button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改基本信息
               td.success 
-                - var info = result
-                button(type='button' class='btn btn-info btn-xs btn-block btn-upd-password' data-result=info data-toggle="modal",data-target="#update_password") 修改密码
+                - var id = result.id
+                button(type='button' class='btn btn-info btn-xs btn-block btn-upd-password' data-id=id data-toggle="modal",data-target="#update_password") 修改密码
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
+      //重置用户密码的模态框
+      div.modal.fade#update_password(tabindex='-1',role='dialog',aria-labelledby='updpassLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 重置密码
+            div.modal-body
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 密码
+                  div.col-sm-7
+                    input.form-control#password_upd(type='password',placeholder='请输入密码(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning7(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 确认密码
+                  div.col-sm-7
+                    input.form-control#password_confirm_upd(type='password',placeholder='请再次输入密码(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning8(style='color:#ff0000')
+            div#upd_pass_id(style="display:none") 存储待重置的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-info.btn-update-password(type='submit') 确认重置
+            span#tips3
       //修改用户基本信息的模态框
       div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
         div.modal-dialog
