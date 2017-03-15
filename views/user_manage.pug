@@ -8,6 +8,24 @@ html
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script#table-template(type="text/x-handlebars-template").
+      {{#each users}}
+        <tr class="success">
+          <td>{{id}}</td>
+          <td>{{email}}</td>
+          <td>{{name}}</td>
+          <td>{{phone}}</td>
+          <td>{{address}}</td>
+          <td>{{site}}</td>
+          <td>{{title}}</td>
+          <td>{{state}}</td>
+          <td>{{created_at}}</td>
+          <td>{{updated_at}}</td>
+          <td><button class="btn btn-info btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"email":"{{email}}","name":"{{name}}","phone":"{{phone}}","address":"{{address}}","site":"{{site}}","title":"{{title}}","state":"{{state}}"}'>修改基本信息</button></td>
+          <td><button class="btn btn-primary btn-xs btn-block btn-upd-password" type="button" data-toggle="modal" data-target="#update_password" data-id={{id}}>修改密码</button></td>
+          <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
+        </tr>
+      {{/each}}
     script.
       $(function (){
         $(document).ready(function(){
@@ -32,10 +50,7 @@ html
             $('#upd_pass_id').html($(this).attr("data-id"));
           });
           $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
-            console.log(1);
-            alert('1');
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的用户?');
-            alert($(this).attr("data-id"));
             $('#del_id').html($(this).attr("data-id"));
           });
         });
@@ -156,24 +171,8 @@ html
             } else { //如果查询到数据则动态生成表格               
               let tbody = $('tbody');
               tbody.html("");
-              for (var i = 0;i<length;i++) {
-                let tr = $('<tr></tr>');
-                tr.appendTo(tbody);
-                $('<td></td>').text(result.users[i].id).appendTo(tr);
-                $('<td></td>').text(result.users[i].email).appendTo(tr);
-                $('<td></td>').text(result.users[i].name).appendTo(tr);
-                $('<td></td>').text(result.users[i].phone).appendTo(tr);
-                $('<td></td>').text(result.users[i].address).appendTo(tr);
-                $('<td></td>').text(result.users[i].site).appendTo(tr);
-                $('<td></td>').text(result.users[i].title).appendTo(tr);
-                $('<td></td>').text(result.users[i].state).appendTo(tr);
-                $('<td></td>').text(result.users[i].created_at).appendTo(tr);
-                $('<td></td>').text(result.users[i].updated_at).appendTo(tr);
-                $('<td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result="' + result.users[i] + '">修改基本信息</button></td>').appendTo(tr);
-                $('<td><button class="btn btn-info btn-xs btn-block btn-upd-password" type="button" data-toggle="modal" data-target="#update_password" data-id="' + result.users[i].id + '">修改密码</button></td>').appendTo(tr);
-                $('<td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id="' + result.users[i].id + '">删除</button></td>').appendTo(tr);
-                tr.addClass('success');
-              }
+              var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
+              $("tbody").html(tableTemplate(result))
             }
           });
         } else {
@@ -327,10 +326,10 @@ html
                 td.success #{val}
               td.success 
                 - var info = result
-                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改基本信息
+                button(type='button' class='btn btn-info btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改基本信息
               td.success 
                 - var id = result.id
-                button(type='button' class='btn btn-info btn-xs btn-block btn-upd-password' data-id=id data-toggle="modal",data-target="#update_password") 修改密码
+                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd-password' data-id=id data-toggle="modal",data-target="#update_password") 修改密码
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
@@ -358,7 +357,7 @@ html
             div#upd_pass_id(style="display:none") 存储待重置的id
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
-              button.btn.btn-info.btn-update-password(type='submit') 确认重置
+              button.btn.btn-primary.btn-update-password(type='submit') 确认重置
             span#tips3
       //修改用户基本信息的模态框
       div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
@@ -404,7 +403,7 @@ html
             div#id_upd(style="display:none") 存储待修改项的id
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
-              button.btn.btn-primary.btn-update(type='submit') 确认修改
+              button.btn.btn-info.btn-update(type='submit') 确认修改
             span#tips2
       //删除用户的模态框
       div.modal.fade#delete(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')

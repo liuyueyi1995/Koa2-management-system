@@ -1,7 +1,8 @@
 var router = require('koa-router')();
 const crypto = require('crypto');
-var ds = require('../datasource')
-var model = require('../models')
+const bcrypt = require('bcrypt');
+var ds = require('../datasource');
+var model = require('../models');
 
 /**------------------------------------------------------------- */
 // 主页
@@ -134,53 +135,39 @@ router.get('/user_manage', async function (ctx, next) {
 });
 
 
-// 采用AJAX处理对前端发回的请求
-router.post('/user_manage',async function(ctx,next) {
+/* ------- 采用AJAX处理对前端发回的请求 ------- */
+/**
+ * 用户管理页
+ * 根据action值的不同完成对应的操作：
+ * 1 - 模糊搜索
+ * 2 - 添加新用户
+ * 3 - 删除用户
+ * 4 - 修改基本信息
+ * 5 - 重置密码
+ */
+router.post('/user_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 1) {
     var users = {};
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
-    if (typeof(content) == Number) {
-      var result1 = await model.Users.where('id','=',content).fetchAll(); 
-      for(;len < result1.length;len++){
-        users[len] = result1.models[len].attributes;
-      }
-    }
-    var result2 = await model.Users.where('email','like',content1).fetchAll(); 
-    var result3 = await model.Users.where('name','like',content1).fetchAll(); 
-    var result4 = await model.Users.where('phone','like',content1).fetchAll(); 
-    var result5 = await model.Users.where('address','like',content1).fetchAll(); 
-    var result6 = await model.Users.where('site','like',content1).fetchAll(); 
-    var result7 = await model.Users.where('title','like',content1).fetchAll(); 
-    var result8 = await model.Users.where('state','like',content1).fetchAll();
-
-    for(;len < result2.length;len++){
-      users[len] = result2.models[len].attributes;
-    }
-    for(;len < result3.length;len++){
-      users[len] = result3.models[len].attributes;
-    }
-    for(;len < result4.length;len++){
-      users[len] = result4.models[len].attributes;
-    }
-    for(;len < result5.length;len++){
-      users[len] = result5.models[len].attributes;
-    }
-    for(;len < result6.length;len++){
-      users[len] = result6.models[len].attributes;
-    }
-    for(;len < result7.length;len++){
-      users[len] = result7.models[len].attributes;
-    }
-    for(;len < result8.length;len++){
-      users[len] = result8.models[len].attributes;
+    var results = await model.Users.query(function(qb) {
+      qb.where('email','like',content1)
+      .orWhere('name','like',content1)
+      .orWhere('phone','like',content1)
+      .orWhere('address','like',content1)
+      .orWhere('site','like',content1)
+      .orWhere('title','like',content1)
+      .orWhere('state','like',content1)
+    }).fetchAll();
+    for(;len < results.length;len++){
+      users[len] = results.models[len].attributes;
     }
     ctx.body = {users,len};
+
   } else if (ctx.request.body.action == 2) {
     var content = ctx.request.body.content;
-    var hmac = crypto.createHmac('sha256', 'liuyueyi');
-    var password = hmac.update(ctx.request.body.content['password']).digest('hex');
+    var password = bcrypt.hashSync(ctx.request.body.content['password'],9);
     var newUser = new model.Users({
       email: ctx.request.body.content['email'],
       password: password,
@@ -194,11 +181,13 @@ router.post('/user_manage',async function(ctx,next) {
     newUser.save();
     let ret = '添加成功！';
     ctx.body = {ret};
+
   } else if (ctx.request.body.action == 3) {
     var id = ctx.request.body.content;
     var result = await model.Users.where('id','=',id).destroy(); 
     let ret = '删除成功！';
     ctx.body = {ret};
+
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
     new model.Users({id: ctx.request.body.content['id']})
@@ -213,10 +202,10 @@ router.post('/user_manage',async function(ctx,next) {
     }, {patch: true});
     let ret = '修改成功！';
     ctx.body = {ret};
+
   } else if (ctx.request.body.action == 5) {
     var content = ctx.request.body.content;
-    var hmac = crypto.createHmac('sha256', 'liuyueyi');
-    var password = hmac.update(ctx.request.body.content['password']).digest('hex');
+    var password = bcrypt.hashSync(ctx.request.body.content['password'],9);
     new model.Users({id: ctx.request.body.content['id']})
     .save({
       password: password

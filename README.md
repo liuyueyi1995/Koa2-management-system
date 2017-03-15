@@ -2,9 +2,12 @@
 ## 简介
 这是一个基于`koa2`的后台管理系统 
 
+使用 `jQuery` 作为前端JS框架  
+使用 `bootstrap` 作为CSS框架  
+使用 `pug`/`jade` 和 `handlebars` 作为HTML页面模板  
 使用 `PostgreSql` 存储业务数据   
-使用 `mongodb` 存储`session`   
-使用 `bookshelf` + `knex` 作为ORM和Query Builder  
+使用 `mongodb` 存储 `session`   
+使用 `Bookshelf` + `Knex` 作为 `ORM` 和 `Query Builder`  
 使用 `Sentry` 作为错误信息的收集反馈平台   
 采用 `AJAX` 处理前端请求     
 
@@ -33,5 +36,5 @@
 
 --- 
 ## TODOs  
-使用handlebars语义模板替代for循环以及字符串拼接工作，提高安全性和性能。 
+用类似任务B的方法，将剩余部分实现。 
 
