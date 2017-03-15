@@ -225,11 +225,94 @@ router.get('/role_manage', async function (ctx, next) {
   });
 });
 
+/**
+ * 项目管理页
+ * 查询数据库，并把信息返回至客户端用于显示 
+ */
 router.get('/study_manage', async function (ctx, next) {
+  var origin_results = await model.Studies.fetchAll();
+  var results = {};
+  for(var i = 0;i < origin_results.length;i++){
+    results[i] = {
+      "id":origin_results.models[i].attributes.id,
+      "uid":origin_results.models[i].attributes.uid,
+      "name":origin_results.models[i].attributes.name,
+      "state":origin_results.models[i].attributes.state,
+      "contract_number":origin_results.models[i].attributes.contract_number,
+      "type":origin_results.models[i].attributes.type,
+      "due_date":origin_results.models[i].attributes.due_date,
+      "need_audit":origin_results.models[i].attributes.need_audit,
+      "createdAt":origin_results.models[i].attributes.created_at,
+      "updatedAt":origin_results.models[i].attributes.updated_at
+    }
+  }
+  console.log(results);
   await ctx.render('study_manage', {
-    title: 'EVA管理平台-数据导入'
-    
+    title: 'EVA管理平台-项目管理',
+    results: results
   });
+});
+
+/**采用AJAX处理对前端发回的请求
+ * 项目管理页
+ * 根据action值的不同完成对应的操作：
+ * 1 - 模糊搜索
+ * 2 - 添加新项目
+ * 3 - 删除项目
+ * 4 - 修改
+ */
+router.post('/study_manage',async function(ctx,next) { 
+  if (ctx.request.body.action == 1) {
+    var studies = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Studies.query(function(qb) {
+      qb.where('uid','like',content1)
+      .orWhere('name','like',content1)
+      .orWhere('state','like',content1)
+    }).fetchAll();
+    for(;len < results.length;len++){
+      studies[len] = results.models[len].attributes;
+    }
+    ctx.body = {studies,len};
+
+  } else if (ctx.request.body.action == 2) {
+    var newStudy = new model.Studies({
+      uid: ctx.request.body.content['uid'],
+      name: ctx.request.body.content['name'],
+      state: ctx.request.body.content['state'],
+      contract_number: ctx.request.body.content['contract_number'],
+      type: ctx.request.body.content['type'],
+      due_date: null,
+      need_audit: ctx.request.body.content['need_audit']
+    });
+    newStudy.save();
+    let ret = '添加成功！';
+    ctx.body = {ret};
+
+  } else if (ctx.request.body.action == 3) {
+    var id = ctx.request.body.content;
+    var result = await model.Studies.where('id','=',id).destroy(); 
+    let ret = '删除成功！';
+    ctx.body = {ret};
+
+  } else if (ctx.request.body.action == 4) {
+    var content = ctx.request.body.content;
+    new model.Studies({id: ctx.request.body.content['id']})
+    .save({
+      uid: ctx.request.body.content['uid'],
+      name: ctx.request.body.content['name'],
+      state: ctx.request.body.content['state'],
+      contract_number: ctx.request.body.content['contract_number'],
+      type: ctx.request.body.content['type'],
+      due_date: null,
+      need_audit: ctx.request.body.content['need_audit']
+    }, {patch: true});
+    let ret = '修改成功！';
+    ctx.body = {ret};
+
+  }
 });
 
 /**
@@ -300,7 +383,6 @@ router.post('/site_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
-    console.log(content)
     new model.Sites({id: ctx.request.body.content['id']})
     .save({
       name: ctx.request.body.content['name'],

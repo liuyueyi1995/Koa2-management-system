@@ -1,3 +1,432 @@
-br
-br
-p(style="color:aliceblue;font-size:48px;margin-left:10px") 暂未开放“项目管理”功能。
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script#table-template(type="text/x-handlebars-template").
+      {{#each studies}}
+        <tr class="success">
+          <td>{{id}}</td>
+          <td>{{uid}}</td>
+          <td>{{name}}</td>
+          <td>{{state}}</td>
+          <td>{{contract_number}}</td>
+          <td>{{type}}</td>
+          <td>{{due_date}}</td>
+          <td>{{need_audit}}</td>
+          <td>{{created_at}}</td>
+          <td>{{updated_at}}</td>
+          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"uid":"{{uid}}","name":"{{name}}","state":"{{state}}","contract_number":"{{contract_number}}","type":"{{type}}","due_date":"{{due_date}}","need_audit":"{{need_audit}}"}'>修改</button></td>
+          <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
+        </tr>
+      {{/each}}
+    script.
+      $(function (){
+        $(document).ready(function(){
+          $('.btn-add').click(add); //模态框里的添加按钮 触发ajax
+          $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
+          $('.btn-search').click(search); //搜索栏的搜索按钮 触发ajax
+          $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
+          $('body').on('click','.btn-upd',function() { //表格里的修改按钮 将该行的信息写入模态框
+            let origin_info = $(this).attr("data-result");
+            let info_obj = eval('('+origin_info+')'); //string to json
+            $('#id_upd').val(info_obj.id);
+            $('#uid_upd').val(info_obj.uid);
+            $('#name_upd').val(info_obj.name);
+            $('#state_upd').val(info_obj.state);
+            $('#contract_number_upd').val(info_obj.contract_number)
+            $('#type_upd').val(info_obj.type)
+            $('#due_date_upd').val(info_obj.due_date)
+            $('#need_audit_upd').val(info_obj.need_audit)
+          });
+          $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
+            $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的项目?');
+            $('#del_id').html($(this).attr("data-id"));
+          });
+        });
+      });
+        
+      function add() {
+        let uid = $('#uid').val();
+        let name = $('#name').val();
+        let state = $('#state').val();
+        let contract_number = $('#contract_number').val();
+        let type = $('#type').val();
+        let due_date = $('#due_date').val();
+        let need_audit = $('#need_audit').val();
+        if ($.trim(uid) == '') {
+          $('#warning1').text('项目uid为必填项！');
+          return;
+        } else {
+          $('#warning1').text('');
+        }
+        if ($.trim(name) == '') {
+          $('#warning2').text('项目名称为必填项！');
+          return;
+        } else {
+          $('#warning2').text('');
+        } 
+        if ($.trim(state) == '') {
+          $('#warning3').text('项目状态为必填项！');
+          return;
+        } else {
+          $('#warning3').text('');
+        } 
+        if ($.trim(contract_number) == '') {
+          $('#warning4').text('病例数为必填项！');
+          return;
+        } else {
+          $('#warning4').text('');
+        }
+        if ($.trim(type) == '') {
+          $('#warning5').text('项目类型为必填项！');
+          return;
+        } else {
+          $('#warning5').text('');
+        }
+        if ($.trim(need_audit) != 'true' && $.trim(need_audit) != 'false') {
+          $('#warning7').text('监查需求必须是boolean值！');
+          return;
+        } else {
+          need_audit == 'true'?true:false;
+          $('#warning7').text('');
+          let newStudy = {
+            "uid":uid,
+            "name":name,
+            "state":state,
+            "contract_number":contract_number,
+            "type":type,
+            "due_date":due_date,
+            "need_audit":need_audit
+          };
+          $.ajax(
+            {
+              url:'/study_manage',
+              data:{content:newStudy,action:2},
+              type:"post",
+              beforeSend: function() {
+                $("#tips").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips').hide();
+              }
+            }
+          );
+          return false;
+        }
+      }
+      function del() {
+        let id = $(this).parent().prev().html();
+        $.ajax(
+          {
+            url:'/study_manage',
+            data:{content:id,action:3},
+            type:"post",
+            beforeSend: function() {
+              $("#tips1").html("<span style='color:blue'>正在处理...</span>");
+            },
+            success: function(result) {
+              if (result) {
+                alert(result.ret);
+                location.reload();
+              } else {
+                $("#tips1").html("<span style='color:blue'>出现错误！</span>");
+              }
+            },
+            error:function() {
+              alert('请求出错');
+            },
+            complete:function() {
+              $('#tips1').hide();
+            }
+          }
+        );
+      }
+      function search() {
+        let content = $('#searchBox').val();
+        if (content) {
+          $.post('/study_manage',{content:content,action:1},function(result){
+            let length = result.len;
+            if ($.isEmptyObject(result.studies)) { //如果没有查询到数据则返回提示
+              alert(`
+              No result matched the given condition!
+
+              Please retry!`);
+            } else { //如果查询到数据则动态生成表格               
+              let tbody = $('tbody');
+              tbody.html("");
+              var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
+              $("tbody").html(tableTemplate(result));
+            }
+          });
+        } else {
+          alert('There is no condition!');
+        }
+      } 
+      function update() {
+        let id = $('#id_upd').val();
+        let uid = $('#uid_upd').val();
+        let name = $('#name_upd').val();
+        let state = $('#state_upd').val();
+        let contract_number = $('#contract_number_upd').val();
+        let type = $('#type_upd').val();
+        let due_date = $('#due_date_upd').val();
+        let need_audit = $('#need_audit_upd').val();
+        if ($.trim(uid) == '') {
+          $('#warning8').text('项目uid为必填项！');
+          return;
+        } else {
+          $('#warning8').text('');
+        }
+        if ($.trim(name) == '') {
+          $('#warning9').text('项目名称为必填项！');
+          return;
+        } else {
+          $('#warning9').text('');
+        } 
+        if ($.trim(state) == '') {
+          $('#warning10').text('项目状态为必填项！');
+          return;
+        } else {
+          $('#warning10').text('');
+        } 
+        if ($.trim(contract_number) == '') {
+          $('#warning11').text('病例数为必填项！');
+          return;
+        } else {
+          $('#warning11').text('');
+        }
+        if ($.trim(type) == '') {
+          $('#warning12').text('项目类型为必填项！');
+          return;
+        } else {
+          $('#warning12').text('');
+        }
+        if ($.trim(need_audit) != 'true' && $.trim(need_audit) != 'false') {
+          $('#warning14').text('监查需求必须是boolean值！');
+          return;
+        } else {
+          need_audit == 'true'?true:false;
+          $('#warning14').text('');
+          let newStudy = {
+            "id":id,
+            "uid":uid,
+            "name":name,
+            "state":state,
+            "contract_number":contract_number,
+            "type":type,
+            "due_date":due_date,
+            "need_audit":need_audit
+          };
+          $.ajax(
+            {
+              url:'/study_manage',
+              data:{content:newStudy,action:4},
+              type:"post",
+              beforeSend: function() {
+                $("#tips").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips').hide();
+              }
+            }
+          );
+          return false;
+        }
+      }
+      
+
+  body
+    div.container
+      div.row
+        ul.list-inline
+          li.col-lg-3.nonpadding
+            p.content-title=title
+          li.col-lg-6.nonpadding
+          li.float-right.col-lg-3.nonpadding
+            div.input-group
+              span.input-group-btn
+                button.btn.btn-warning(type='button',data-toggle="modal",data-target="#add") 添加新项目
+              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
+              span.input-group-btn
+                button.btn.btn-warning.btn-search(type='button') 搜索
+            
+      div.row
+        table.table
+          thead
+            tr
+              th 序号
+              th 项目uid
+              th 项目名称
+              th 项目状态
+              th 病例数
+              th 项目类型
+              th 截止日期
+              th 监察需求
+              th 创建日期
+              th 修改日期
+              th 修改
+              th 删除
+          tbody
+            each result in results
+              tr
+              each val in result
+                td.success #{val}
+              td.success 
+                - var info = result
+                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改
+              td.success 
+                - var id = result.id
+                button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
+      
+      //修改项目信息的模态框
+      div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 修改项目信息
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 项目uid
+                  div.col-sm-7
+                    input.form-control#uid_upd(type='text',placeholder='请输入项目uid(必填)',value='')
+                  div.col-sm-3
+                    p#warning8(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目名称
+                  div.col-sm-7
+                    input.form-control#name_upd(type='text' placeholder='请输入项目名称(必填)',value='') 
+                  div.col-sm-3
+                    p#warning9(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目状态
+                  div.col-sm-7
+                    input.form-control#state_upd(type='text' placeholder='请输入项目地址(必填)',value='')
+                  div.col-sm-3
+                    p#warning10(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 病例数
+                  div.col-sm-7
+                    input.form-control#contract_number_upd(type='text' placeholder='请输入病例数(必填)',value='')
+                  div.col-sm-3
+                    p#warning11(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目类型
+                  div.col-sm-7
+                    input.form-control#type_upd(type='text' placeholder='请输入项目状态(必填)',value='') 
+                  div.col-sm-3
+                    p#warning12(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 截止日期
+                  div.col-sm-7
+                    input.form-control#due_date_upd(type='text' placeholder='请输入截止日期',value='')
+                  div.col-sm-3
+                    p#warning13(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 监察需求
+                  div.col-sm-7
+                    input.form-control#need_audit_upd(type='text' placeholder='请输入监察需求(必填)',value='')
+                  div.col-sm-3
+                    p#warning14(style='color:#ff0000')
+            div#id_upd(style="display:none") 存储待修改项的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-update(type='submit') 确认修改
+            span#tips2
+      //删除用户的模态框
+      div.modal.fade#delete(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 删除项目
+            div.modal-body#del_confirm 确认删除？
+            div#del_id(style="display:none") 存储待删除的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-danger.btn-delete(type='submit') 确认删除
+            span#tips1
+      //添加项目的模态框
+      div.modal.fade#add(tabindex='-1',role='dialog',aria-labelledby='addLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 添加新项目
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 项目uid
+                  div.col-sm-7
+                    input.form-control#uid(type='text',placeholder='请输入项目uid(必填)',value='')
+                  div.col-sm-3
+                    p#warning1(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目名称
+                  div.col-sm-7
+                    input.form-control#name(type='text' placeholder='请输入项目名称(必填)',value='') 
+                  div.col-sm-3
+                    p#warning2(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目状态
+                  div.col-sm-7
+                    input.form-control#state(type='text' placeholder='请输入项目地址(必填)',value='')
+                  div.col-sm-3
+                    p#warning3(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 病例数
+                  div.col-sm-7
+                    input.form-control#contract_number(type='text' placeholder='请输入病例数(必填)',value='')
+                  div.col-sm-3
+                    p#warning4(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目类型
+                  div.col-sm-7
+                    input.form-control#type(type='text' placeholder='请输入项目状态(必填)',value='') 
+                  div.col-sm-3
+                    p#warning5(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 截止日期
+                  div.col-sm-7
+                    input.form-control#due_date(type='text' placeholder='请输入截止日期',value='')
+                  div.col-sm-3
+                    p#warning6(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 监察需求
+                  div.col-sm-7
+                    input.form-control#need_audit(type='text' placeholder='请输入监察需求(必填)',value='')
+                  div.col-sm-3
+                    p#warning7(style='color:#ff0000')
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-add(type='submit') 确认添加
+            span#tips
