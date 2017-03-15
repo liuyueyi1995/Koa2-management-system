@@ -1,3 +1,349 @@
-br
-br
-p(style="color:aliceblue;font-size:48px;margin-left:10px") 暂未开放“机构管理”功能。
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script#table-template(type="text/x-handlebars-template").
+      {{#each sites}}
+        <tr class="success">
+          <td>{{id}}</td>
+          <td>{{name}}</td>
+          <td>{{type}}</td>
+          <td>{{address}}</td>
+          <td>{{code}}</td>
+          <td>{{created_at}}</td>
+          <td>{{updated_at}}</td>
+          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"name":"{{name}}","type":"{{type}}","address":"{{address}}","code":"{{code}}"}'>修改</button></td>
+          <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
+        </tr>
+      {{/each}}
+    script.
+      $(function (){
+        $(document).ready(function(){
+          $('.btn-add').click(add); //模态框里的添加按钮 触发ajax
+          $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
+          $('.btn-search').click(search); //搜索栏的搜索按钮 触发ajax
+          $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
+          $('body').on('click','.btn-upd',function() { //表格里的修改基本信息按钮 将该行的信息写入模态框
+            let origin_info = $(this).attr("data-result");
+            let info_obj = eval('('+origin_info+')'); //string to json
+            $('#id_upd').val(info_obj.id);
+            $('#name_upd').val(info_obj.name);
+            $('#type_upd').val(info_obj.type);
+            $('#address_upd').val(info_obj.address);
+            $('#code_upd').val(info_obj.code)
+          });
+          $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
+            $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的机构?');
+            $('#del_id').html($(this).attr("data-id"));
+          });
+        });
+      });
+        
+      function add() {
+        let name = $('#name').val();
+        let type = $('#type').val();
+        let address = $('#address').val();
+        let code = $('#code').val();
+        if ($.trim(name) == '') {
+          $('#warning1').text('机构名称为必填项！');
+          return;
+        } else {
+          $('#warning1').text('');
+        }
+        if ($.trim(type) == '') {
+          $('#warning2').text('机构类型为必填项！');
+          return;
+        } else {
+          $('#warning2').text('');
+        } 
+        if ($.trim(address) == '') {
+          $('#warning3').text('机构地址为必填项！');
+          return;
+        } else {
+          $('#warning3').text('');
+        } 
+        if ($.trim(code) == '') {
+          $('#warning4').text('机构代码为必填项！');
+          return;
+        } else {
+          $('#warning4').text('');
+          let newSite = {
+            "name":name,
+            "type":type,
+            "address":address,
+            "code":code
+          };
+          $.ajax(
+            {
+              url:'/site_manage',
+              data:{content:newSite,action:2},
+              type:"post",
+              beforeSend: function() {
+                $("#tips").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips').hide();
+              }
+            }
+          );
+          return false;
+        }
+      }
+      function del() {
+        let id = $(this).parent().prev().html();
+        $.ajax(
+          {
+            url:'/site_manage',
+            data:{content:id,action:3},
+            type:"post",
+            beforeSend: function() {
+              $("#tips1").html("<span style='color:blue'>正在处理...</span>");
+            },
+            success: function(result) {
+              if (result) {
+                alert(result.ret);
+                location.reload();
+              } else {
+                $("#tips1").html("<span style='color:blue'>出现错误！</span>");
+              }
+            },
+            error:function() {
+              alert('请求出错');
+            },
+            complete:function() {
+              $('#tips1').hide();
+            }
+          }
+        );
+      }
+      function search() {
+        let content = $('#searchBox').val();
+        if (content) {
+          $.post('/site_manage',{content:content,action:1},function(result){
+            let length = result.len;
+            if ($.isEmptyObject(result.sites)) { //如果没有查询到数据则返回提示
+              alert(`
+              No result matched the given condition!
+
+              Please retry!`);
+            } else { //如果查询到数据则动态生成表格               
+              let tbody = $('tbody');
+              tbody.html("");
+              var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
+              $("tbody").html(tableTemplate(result))
+            }
+          });
+        } else {
+          alert('There is no condition!');
+        }
+      } 
+      function update() {
+        let id = $('#id_upd').val();
+        let name = $('#name_upd').val();
+        let type = $('#type_upd').val();
+        let address = $('#address_upd').val();
+        let code = $('#code_upd').val();
+        if ($.trim(name) == '') {
+          $('#warning5').text('机构名称为必填项！');
+          return;
+        } else {
+          $('#warning5').text('');
+        }
+        if ($.trim(type) == '') {
+          $('#warning6').text('机构类型为必填项！');
+          return;
+        } else {
+          $('#warning6').text('');
+        } 
+        if ($.trim(address) == '') {
+          $('#warning7').text('机构地址为必填项！');
+          return;
+        } else {
+          $('#warning7').text('');
+        } 
+        if ($.trim(code) == '') {
+          $('#warning8').text('机构代码为必填项！');
+          return;
+        } else {
+          $('#warning8').text('');
+          let newSite = {
+            "id":id,
+            "name":name,
+            "type":type,
+            "address":address,
+            "code":code
+          };
+          $.ajax(
+            {
+              url:'/site_manage',
+              data:{content:newSite,action:4},
+              type:"post",
+              beforeSend: function() {
+                $("#tips2").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips2").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips2').hide();
+              }
+            }
+          );
+          return false;
+        }
+      }
+      
+
+  body
+    div.container
+      div.row
+        ul.list-inline
+          li.col-lg-3.nonpadding
+            p.content-title=title
+          li.col-lg-6.nonpadding
+          li.float-right.col-lg-3.nonpadding
+            div.input-group
+              span.input-group-btn
+                button.btn.btn-warning(type='button',data-toggle="modal",data-target="#add") 添加新机构
+              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
+              span.input-group-btn
+                button.btn.btn-warning.btn-search(type='button') 搜索
+            
+      div.row
+        table.table
+          thead
+            tr
+              th 序号
+              th 机构名称
+              th 机构类型
+              th 机构地址
+              th 机构代码
+              th 创建日期
+              th 修改日期
+              th 修改
+              th 删除
+          tbody
+            each result in results
+              tr
+              each val in result
+                td.success #{val}
+              td.success 
+                - var info = result
+                button(type='button' class='btn btn-primary btn-xs btn-block btn-upd' data-result=info data-toggle="modal",data-target="#update") 修改
+              td.success 
+                - var id = result.id
+                button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
+      
+      //修改机构信息的模态框
+      div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 修改机构信息
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 机构名称
+                  div.col-sm-7
+                    input.form-control#name_upd(type='text',placeholder='请输入机构名称(必填)',value='')
+                  div.col-sm-3
+                    p#warning5(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构类型
+                  div.col-sm-7
+                    input.form-control#type_upd(type='text' placeholder='请输入机构类型(必填)',value='') 
+                  div.col-sm-3
+                    p#warning6(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构地址
+                  div.col-sm-7
+                    input.form-control#address_upd(type='text' placeholder='请输入机构地址(必填)',value='')
+                  div.col-sm-3
+                    p#warning7(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构代码
+                  div.col-sm-7
+                    input.form-control#code_upd(type='text' placeholder='请输入机构代码(必填)',value='')
+                  div.col-sm-3
+                    p#warning8(style='color:#ff0000')
+            div#id_upd(style="display:none") 存储待修改项的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-update(type='submit') 确认修改
+            span#tips2
+      //删除用户的模态框
+      div.modal.fade#delete(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 删除机构
+            div.modal-body#del_confirm 确认删除？
+            div#del_id(style="display:none") 存储待删除的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-danger.btn-delete(type='submit') 确认删除
+            span#tips1
+      //添加机构的模态框
+      div.modal.fade#add(tabindex='-1',role='dialog',aria-labelledby='addLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 添加新机构
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 机构名称
+                  div.col-sm-7
+                    input.form-control#name(type='text',placeholder='请输入机构名称(必填)',value='',required)
+                  div.col-sm-3
+                    p#warning1(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构类型
+                  div.col-sm-7
+                    input.form-control#type(type='text' placeholder='请输入机构类型',value='') 
+                  div.col-sm-3
+                    p#warning2(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构地址
+                  div.col-sm-7
+                    input.form-control#address(type='text' placeholder='请输入机构地址',value='')
+                  div.col-sm-3
+                    p#warning3(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构代码
+                  div.col-sm-7
+                    input.form-control#code(type='text' placeholder='请输入机构代码',value='')
+                  iv.col-sm-3
+                    p#warning4(style='color:#ff0000')
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-add(type='submit') 确认添加
+            span#tips

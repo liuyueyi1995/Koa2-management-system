@@ -109,8 +109,11 @@ router.get('/logout', async function (ctx, next) {
 });
 
 
-/**------------------------------------------------------------- */
-// 用户管理页
+
+/**
+ * 用户管理页
+ * 查询数据库，并把信息返回至客户端用于显示 
+ */ 
 router.get('/user_manage', async function (ctx, next) {
   var origin_results = await model.Users.fetchAll();
   var results = {};
@@ -135,8 +138,7 @@ router.get('/user_manage', async function (ctx, next) {
 });
 
 
-/* ------- 采用AJAX处理对前端发回的请求 ------- */
-/**
+/**采用AJAX处理对前端发回的请求
  * 用户管理页
  * 根据action值的不同完成对应的操作：
  * 1 - 模糊搜索
@@ -226,14 +228,92 @@ router.get('/role_manage', async function (ctx, next) {
 router.get('/study_manage', async function (ctx, next) {
   await ctx.render('study_manage', {
     title: 'EVA管理平台-数据导入'
+    
   });
 });
 
+/**
+ * 机构管理页
+ * 查询数据库，并把信息返回至客户端用于显示 
+ */ 
 router.get('/site_manage', async function (ctx, next) {
+  var origin_results = await model.Sites.fetchAll();
+  var results = {};
+  for(var i = 0;i < origin_results.length;i++){
+    results[i] = {
+      "id":origin_results.models[i].attributes.id,
+      "name":origin_results.models[i].attributes.name,
+      "type":origin_results.models[i].attributes.type,
+      "address":origin_results.models[i].attributes.address,
+      "code":origin_results.models[i].attributes.code,
+      "createdAt":origin_results.models[i].attributes.created_at,
+      "updatedAt":origin_results.models[i].attributes.updated_at,
+    }
+  }
   await ctx.render('site_manage', {
-    title: 'EVA管理平台-数据导入'
+    title: 'EVA管理平台-机构管理',
+    results: results
   });
 });
+
+/**采用AJAX处理对前端发回的请求
+ * 机构管理页
+ * 根据action值的不同完成对应的操作：
+ * 1 - 模糊搜索
+ * 2 - 添加新机构
+ * 3 - 删除机构
+ * 4 - 修改
+ */
+router.post('/site_manage',async function(ctx,next) { 
+  if (ctx.request.body.action == 1) {
+    var sites = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Sites.query(function(qb) {
+      qb.where('name','like',content1)
+      .orWhere('type','like',content1)
+      .orWhere('address','like',content1)
+      .orWhere('code','like',content1)
+    }).fetchAll();
+    for(;len < results.length;len++){
+      sites[len] = results.models[len].attributes;
+    }
+    ctx.body = {sites,len};
+
+  } else if (ctx.request.body.action == 2) {
+    var newSite = new model.Sites({
+      name: ctx.request.body.content['name'],
+      type: ctx.request.body.content['type'],
+      address: ctx.request.body.content['address'],
+      code: ctx.request.body.content['code']
+    });
+    newSite.save();
+    let ret = '添加成功！';
+    ctx.body = {ret};
+
+  } else if (ctx.request.body.action == 3) {
+    var id = ctx.request.body.content;
+    var result = await model.Sites.where('id','=',id).destroy(); 
+    let ret = '删除成功！';
+    ctx.body = {ret};
+
+  } else if (ctx.request.body.action == 4) {
+    var content = ctx.request.body.content;
+    console.log(content)
+    new model.Sites({id: ctx.request.body.content['id']})
+    .save({
+      name: ctx.request.body.content['name'],
+      type: ctx.request.body.content['type'],
+      address: ctx.request.body.content['address'],
+      code: ctx.request.body.content['code']
+    }, {patch: true});
+    let ret = '修改成功！';
+    ctx.body = {ret};
+
+  }
+});
+
 
 /**------------------------------------------------------------- */
 // 日志管理
