@@ -70,7 +70,72 @@ html
         });
       });
       function add() {
-
+        let user = $('#user').val();
+        let study = $('#study').val();
+        let site = $('#site').val();
+        let type = $('#type').val();
+        let state = $('#state').val();
+        if ($.trim(user) == '') {
+          $('#warning1').text('用户为必填项！');
+          return;
+        } else {
+          $('#warning1').text('');
+        }
+        if ($.trim(study) == '') {
+          $('#warning2').text('项目名称为必填项！');
+          return;
+        } else {
+          $('#warning2').text('');
+        } 
+        if ($.trim(site) == '') {
+          $('#warning3').text('机构名称为必填项！');
+          return;
+        } else {
+          $('#warning3').text('');
+        } 
+        if ($.trim(type) == '') {
+          $('#warning4').text('角色类型为必填项！');
+          return;
+        } else {
+          $('#warning4').text('');
+        }
+        if ($.trim(state) == '') {
+          $('#warning5').text('角色状态为必填项！');
+          return;
+        } else {
+          $('#warning5').text('');
+          let newRole = {
+            "user":user,
+            "study":study,
+            "site":site,
+            "type":type,
+            "state":state
+          };
+          $.ajax(
+            {
+              url:'/role_manage',
+              data:{content:newRole,action:2},
+              type:"post",
+              beforeSend: function() {
+                $("#tips").html("<span style='color:blue'>正在处理...</span>");
+              },
+              success: function(result) {
+                if (result) {
+                  alert(result.ret);
+                  location.reload();
+                } else {
+                  $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                }
+              },
+              error:function() {
+                alert('请求出错');
+              },
+              complete:function() {
+                $('#tips').hide();
+              }
+            }
+          );
+        } 
       }
       function del() {
         let id = $(this).parent().prev().html();
@@ -209,7 +274,7 @@ html
                       option(value='AUDITOR') AUDITOR
                       option(value='INPUTTER') INPUTTER
                   div.col-sm-3
-                    p#warning5(style='color:#ff0000')
+                    p#warning4(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 状态
                   div.col-sm-7
@@ -217,7 +282,7 @@ html
                       option(value='ENABLE') ENABLE
                       option(value='DISABLE') DISABLE
                   div.col-sm-3
-                    p#warning6(style='color:#ff0000')
+                    p#warning5(style='color:#ff0000')
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
               button.btn.btn-primary.btn-add(type='submit') 确认添加

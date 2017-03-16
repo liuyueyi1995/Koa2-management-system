@@ -292,16 +292,14 @@ router.post('/role_manage',async function(ctx,next) {
     ctx.body = {sites};
 
   } else if (ctx.request.body.action == 2) {
-    var newStudy = new model.Roles({
-      uid: ctx.request.body.content['uid'],
-      name: ctx.request.body.content['name'],
-      state: ctx.request.body.content['state'],
-      contract_number: ctx.request.body.content['contract_number'],
+    var newRole = new model.Roles({
+      user_id: ctx.request.body.content['user'],
+      study_id: ctx.request.body.content['study'],
+      site_id: ctx.request.body.content['site'],
       type: ctx.request.body.content['type'],
-      due_date: null,
-      need_audit: ctx.request.body.content['need_audit']
+      state: ctx.request.body.content['state']
     });
-    newStudy.save();
+    newRole.save();
     let ret = '添加成功！';
     ctx.body = {ret};
 
