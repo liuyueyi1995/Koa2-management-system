@@ -125,7 +125,9 @@ p.content-title {
 a.in-button {
 	text-decoration:none;
 }
-
+.hidden {
+	display: none;
+}
 /*--css of login--*/
 .loginbox { 
 	width:480px; 
