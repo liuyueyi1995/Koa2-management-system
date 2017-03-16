@@ -11,15 +11,67 @@ html
     script.
       $(function (){
         $(document).ready(function(){
+          $('.btn-add').click(add); //搜索栏的添加按钮 触发ajax
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
-          $('.btn-search').click(search); //搜索栏的搜索按钮 触发ajax
+          $('.btn-search').click(search); //搜索栏的搜索按钮 利用css实现搜索
           $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
-            $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的角色?');
+            $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的角色信息?');
             $('#del_id').html($(this).attr("data-id"));
           });
+          $('body').on('click','.btn-ad',function() { //搜索框旁边的添加按钮 将所有已存在的用户信息传递给模态框
+            let origin_user = $(this).attr("data-user");
+            let user_obj = eval('('+origin_user+')'); //string to json
+            let select_user = $('#user');
+            select_user.html(""); //先清空下拉选项
+            for(var item in user_obj){ //item是下标
+              let option = $('<option value='+ user_obj[item].id +'>'+ user_obj[item].name+'</option>');
+              option.appendTo(select_user); //添加节点
+            } 
+            let origin_study = $(this).attr("data-study");
+            let study_obj = eval('('+origin_study+')'); //string to json
+            let select_study = $('#study');
+            select_study.html(""); //先清空下拉选项
+            for(var item in study_obj){ //item是下标
+              let option = $('<option value='+ study_obj[item].id +'>'+ study_obj[item].name+'</option>');
+              option.appendTo(select_study); //添加节点
+            }
+          });
+          $('body').on('change','#study',function(){//级联下拉菜单，当选中的项目改变时，触发ajax修改机构信息
+            let id = $(this).val();
+            $.ajax(
+              {
+                url:'/role_manage',
+                data:{content:id,action:1},
+                type:"post",
+                beforeSend: function() {
+                  $("#tips").html("<span style='color:blue'>正在处理...</span>");
+                },
+                success: function(result) {
+                  if (result) {
+                    let select_site = $('#site');
+                    select_site.html(""); //先清空下拉选项
+                    for(var item in result.sites){ //item是下标
+                      let option = $('<option value='+ result.sites[item].id +'>'+ result.sites[item].name+'</option>');
+                      option.appendTo(select_site); //添加节点
+                    }
+                  } else {
+                    $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                  }
+                },
+                error: function() {
+                  alert('请求出错');
+                },
+                complete: function() {
+                  $('#tips').hide();
+                }
+              }
+            );
+          }); 
         });
       });
-      
+      function add() {
+
+      }
       function del() {
         let id = $(this).parent().prev().html();
         $.ajax(
@@ -47,8 +99,10 @@ html
           }
         );
       }
-      function search() { 
-        //因为roles表查询涉及外键，逻辑比较复杂，这里改成通过字符串模式匹配，将不匹配的行隐藏，达到搜索效果
+      function search() {
+        /** 因为roles表查询涉及外键和真实值之间的转换，逻辑比较复杂，
+         *  这里改成通过字符串模式匹配，将不匹配的行隐藏，达到搜索效果
+         */
         let content = $.trim($('#searchBox').val());
         if (content) {
           $('tbody tr').addClass('hidden');
@@ -61,7 +115,7 @@ html
         } else {
           alert('There is no condition!');
         }
-      } 
+      }
 
   body
     div.container
@@ -73,7 +127,9 @@ html
           li.float-right.col-lg-3.nonpadding
             div.input-group
               span.input-group-btn
-                button.btn.btn-warning(type='button',data-toggle="modal",data-target="#add") 添加
+                - var users = results.users
+                - var studies = results.studies
+                button.btn.btn-warning.btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加
               input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
@@ -130,32 +186,36 @@ html
                   label.col-sm-2.control-label 用户
                   div.col-sm-7
                     select.form-control#user
-                      each user in results.users
-                        option(value=) #{key}.#{val}
                   div.col-sm-3
                     p#warning1(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 项目
                   div.col-sm-7
-                    input.form-control#name(type='text' placeholder='请输入项目名称(必填)',value='') 
+                    select.form-control#study
                   div.col-sm-3
                     p#warning2(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 机构
                   div.col-sm-7
-                    input.form-control#state(type='text' placeholder='请输入项目地址(必填)',value='')
+                    select.form-control#site
                   div.col-sm-3
                     p#warning3(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 类型
                   div.col-sm-7
-                    input.form-control#type(type='text' placeholder='请输入项目状态(必填)',value='') 
+                    select.form-control#type
+                      option(value='STUDY_ADMIN') STUDY_ADMIN
+                      option(value='SITE_ADMIN') SITE_ADMIN
+                      option(value='AUDITOR') AUDITOR
+                      option(value='INPUTTER') INPUTTER
                   div.col-sm-3
                     p#warning5(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 状态
                   div.col-sm-7
-                    input.form-control#due_date(type='text' placeholder='请输入截止日期',value='')
+                    select.form-control#state
+                      option(value='ENABLE') ENABLE
+                      option(value='DISABLE') DISABLE
                   div.col-sm-3
                     p#warning6(style='color:#ff0000')
             div.modal-footer

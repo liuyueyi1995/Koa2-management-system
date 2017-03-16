@@ -13,28 +13,6 @@ const Users = ds.bookshelf.Model.extend({
     }
 });
 
-// Studies表示研究项目
-const Studies = ds.bookshelf.Model.extend({
-    tableName: 'studies',
-    role: function() {
-        return this.hasOne(Roles);
-    }
-});
-
-// Sites表示研究机构
-const Sites = ds.bookshelf.Model.extend({
-    tableName: 'sites',
-    role: function() {
-        return this.hasOne(Roles);
-    }
-});
-
-// Logs表示系统产生的日志
-const Logs = ds.bookshelf.Model.extend({
-    tableName: 'logs'
-});
-
-
 // Roles表示角色
 const Roles = ds.bookshelf.Model.extend({
     tableName: 'roles',
@@ -49,11 +27,51 @@ const Roles = ds.bookshelf.Model.extend({
     }
 });
 
+// Studies表示研究项目
+const Studies = ds.bookshelf.Model.extend({
+    tableName: 'studies',
+    role: function() {
+        return this.hasOne(Roles);
+    },
+    study_site: function() {
+        return this.hasOne(Study_Sites);
+    }
+});
+
+// Sites表示研究机构
+const Sites = ds.bookshelf.Model.extend({
+    tableName: 'sites',
+    role: function() {
+        return this.hasOne(Roles);
+    },
+    study_site: function() {
+        return this.hasOne(Study_Sites);
+    }
+});
+
+// Study_Sites表示项目-机构关系表
+const Study_Sites = ds.bookshelf.Model.extend({
+    tableName: 'study_sites',
+    study: function() {
+        return this.belongsTo(Studies);
+    },
+    site: function() {
+        return this.belongsTo(Sites);
+    }
+});
+// Logs表示系统产生的日志
+const Logs = ds.bookshelf.Model.extend({
+    tableName: 'logs'
+});
+
+
+
 module.exports = {
     Managers:Managers,
     Users: Users,
     Roles:Roles, 
     Studies: Studies,
     Sites:Sites,
+    Study_Sites:Study_Sites,
     Logs: Logs
 }

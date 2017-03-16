@@ -261,7 +261,6 @@ router.get('/role_manage', async function (ctx, next) {
       "name": origin_studies.models[i].attributes.name
     }
   }
-  console.log(users)
   await ctx.render('role_manage', {
     title: 'EVA管理平台-角色管理',
     results: {results,users,sites,studies}
@@ -271,26 +270,26 @@ router.get('/role_manage', async function (ctx, next) {
 /**采用AJAX处理对前端发回的请求
  * 角色管理页
  * 根据action值的不同完成对应的操作：
- * 1 - 模糊搜索
- * 2 - 添加新项目
- * 3 - 删除项目
+ * 1 - 根据项目id查询出参与该项目的所有机构信息 
+ * 2 - 添加角色信息
+ * 3 - 删除角色信息
  * 4 - 修改
  */
 router.post('/role_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 1) {
-    var studies = {};
-    var len = 0;
-    var content = ctx.request.body.content;
-    var content1 = '%'+content+'%'; 
-    var results = await model.Roles.query(function(qb) {
-      qb.where('uid','like',content1)
-      .orWhere('name','like',content1)
-      .orWhere('state','like',content1)
-    }).fetchAll();
-    for(;len < results.length;len++){
-      studies[len] = results.models[len].attributes;
+    var sites = {};
+    var id = ctx.request.body.content;
+    console.log(id)
+    var origin_results = await model.Study_Sites.where({study_id:id}).fetchAll({withRelated:['study','site']});
+    
+    for(var i = 0;i < origin_results.length;i++){
+      sites[i] = {
+        "id": origin_results.models[i].relations.site.attributes.id,
+        "name": origin_results.models[i].relations.site.attributes.name
+      }
     }
-    ctx.body = {studies,len};
+    console.log(sites)
+    ctx.body = {sites};
 
   } else if (ctx.request.body.action == 2) {
     var newStudy = new model.Roles({
