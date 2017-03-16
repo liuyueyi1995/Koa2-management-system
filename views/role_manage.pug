@@ -11,9 +11,26 @@ html
     script.
       $(function (){
         $(document).ready(function(){
+          $('tbody tr').each(function() {
+            $(this).children("td:eq(4)").addClass('hidden');
+            $(this).children("td:eq(5)").addClass('hidden');
+            $(this).children("td:eq(6)").addClass('hidden');
+          });
           $('.btn-add').click(add); //搜索栏的添加按钮 触发ajax
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
+          $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
           $('.btn-search').click(search); //搜索栏的搜索按钮 利用css实现搜索
+          $('body').on('click','.btn-upd',function() { //表格里的修改按钮 将该行的信息写入模态框
+            let origin_info = $(this).attr("data-result");
+            let info_obj = eval('('+origin_info+')'); //string to json
+            console.log(info_obj)
+            $('#id_upd').val(info_obj.id);
+            $('#user_upd').val(info_obj.user_name);
+            $('#site_upd').val(info_obj.site_name);
+            $('#study_upd').val(info_obj.study_name);
+            $('#type_upd').val(info_obj.type);
+            $('#state_upd').val(info_obj.state);
+          });
           $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的角色信息?');
             $('#del_id').html($(this).attr("data-id"));
@@ -181,6 +198,39 @@ html
           alert('There is no condition!');
         }
       }
+      function update() {
+        let id = $('#id_upd').val();
+        let state = $('#state_upd').val();
+        let newRole = {
+          "id":id,
+          "state":state
+        };
+        console.log(newRole)
+        $.ajax(
+          {
+            url:'/role_manage',
+            data:{content:newRole,action:4},
+            type:"post",
+            beforeSend: function() {
+              $("#tips").html("<span style='color:blue'>正在处理...</span>");
+            },
+            success: function(result) {
+              if (result) {
+                alert(result.ret);
+                location.reload();
+              } else {
+                $("#tips").html("<span style='color:blue'>出现错误！</span>");
+              }
+            },
+            error:function() {
+              alert('请求出错');
+            },
+            complete:function() {
+             $('#tips').hide();
+            }
+          }
+        );
+      }
 
   body
     div.container
@@ -194,7 +244,7 @@ html
               span.input-group-btn
                 - var users = results.users
                 - var studies = results.studies
-                button.btn.btn-warning.btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加
+                button.btn.btn-warning.btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加角色信息
               input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
@@ -224,8 +274,57 @@ html
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
-      
-      //删除用户的模态框
+      //修改角色的模态框
+      div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 修改角色信息
+            div.modal-body 
+              form.form-horizontal(role='form')
+                div.form-group
+                  label.col-sm-2.control-label 用户
+                  div.col-sm-7
+                    input.form-control#user_upd(type='text' disabled=true)
+                  div.col-sm-3
+                    p#warning6(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 项目
+                  div.col-sm-7
+                    input.form-control#study_upd(type='text' disabled=true)
+                  div.col-sm-3
+                    p#warning7(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构
+                  div.col-sm-7
+                    input.form-control#site_upd(type='text' disabled=true)
+                  div.col-sm-3
+                    p#warning8(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 类型
+                  div.col-sm-7
+                    select.form-control#type_upd(disabled=true)
+                      option(value='STUDY_ADMIN') STUDY_ADMIN
+                      option(value='SITE_ADMIN') SITE_ADMIN
+                      option(value='AUDITOR') AUDITOR
+                      option(value='INPUTTER') INPUTTER
+                  div.col-sm-3
+                    p#warning9(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 状态
+                  div.col-sm-7
+                    select.form-control#state_upd
+                      option(value='ENABLE') ENABLE
+                      option(value='DISABLE') DISABLE
+                  div.col-sm-3
+                    p#warning10(style='color:#ff0000')
+            div#id_upd(style="display:none") 存储待修改项的id
+            div.modal-footer
+              button.btn.btn-default(type='button' data-dismiss='modal') 取消
+              button.btn.btn-primary.btn-update(type='submit') 确认修改
+            span#tips2
+      //删除角色信息的模态框
       div.modal.fade#delete(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')
         div.modal-dialog
           div.modal-content
@@ -238,7 +337,7 @@ html
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
               button.btn.btn-danger.btn-delete(type='submit') 确认删除
             span#tips1
-      //添加项目的模态框
+      //添加角色信息的模态框
       div.modal.fade#add(tabindex='-1',role='dialog',aria-labelledby='addLabel',aria-hidden='true')
         div.modal-dialog
           div.modal-content

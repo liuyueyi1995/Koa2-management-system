@@ -225,7 +225,7 @@ router.post('/user_manage',async function(ctx,next) {
 router.get('/role_manage', async function (ctx, next) {
   var results = {};
   var users = {};
-  var sites = {};
+  var ids = {};
   var studies = {};
   var origin_results = await model.Roles.forge().fetchAll({withRelated:['user','study','site']});
   for(var i = 0;i < origin_results.length;i++){
@@ -234,6 +234,9 @@ router.get('/role_manage', async function (ctx, next) {
       "user_name":origin_results.models[i].relations.user.attributes.name,
       "study_name":origin_results.models[i].relations.study.attributes.name,
       "site_name":origin_results.models[i].relations.site.attributes.name,
+      "user_id":origin_results.models[i].relations.user.attributes.id,
+      "study_id":origin_results.models[i].relations.study.attributes.id,
+      "site_id":origin_results.models[i].relations.site.attributes.id,
       "type":origin_results.models[i].attributes.type,
       "state":origin_results.models[i].attributes.state,
       "createdAt":origin_results.models[i].attributes.created_at,
@@ -247,13 +250,6 @@ router.get('/role_manage', async function (ctx, next) {
       "name": origin_users.models[i].attributes.name
     }
   }
-  var origin_sites = await model.Sites.fetchAll();
-  for(var i = 0;i < origin_sites.length;i++){
-    sites[i] = {
-      "id": origin_sites.models[i].attributes.id,
-      "name": origin_sites.models[i].attributes.name
-    }
-  }
   var origin_studies = await model.Studies.fetchAll();
   for(var i = 0;i < origin_studies.length;i++){
     studies[i] = {
@@ -263,7 +259,7 @@ router.get('/role_manage', async function (ctx, next) {
   }
   await ctx.render('role_manage', {
     title: 'EVA管理平台-角色管理',
-    results: {results,users,sites,studies}
+    results: {results,users,studies,ids}
   });
 });
 
@@ -311,17 +307,12 @@ router.post('/role_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
+    console.log(content)
     new model.Roles({id: ctx.request.body.content['id']})
     .save({
-      uid: ctx.request.body.content['uid'],
-      name: ctx.request.body.content['name'],
-      state: ctx.request.body.content['state'],
-      contract_number: ctx.request.body.content['contract_number'],
-      type: ctx.request.body.content['type'],
-      due_date: null,
-      need_audit: ctx.request.body.content['need_audit']
+      state: ctx.request.body.content['state']
     }, {patch: true});
-    let ret = '修改成功！';
+    let ret = '状态修改成功！';
     ctx.body = {ret};
 
   }
@@ -511,45 +502,6 @@ router.get('/log_manage', async function (ctx, next) {
   });
 });
 
-// 采用AJAX处理对logs表的搜索
-router.post('/log_manage',async function(ctx,next) {
-  var logs = {};
-  var len = 0;
-  var content = ctx.request.body.content;
-  var content1 = '%'+content+'%'; 
-  if (typeof(content) == Number) {
-    var result1 = await model.WafLogs.where('id','=',content).fetchAll(); 
-    for(;len < result1.length;len++){
-      logs[len] = result1.models[len].attributes;
-    }
-  }
-  var result2 = await model.WafLogs.where('time','like',content1).fetchAll(); 
-  var result3 = await model.WafLogs.where('username','like',content1).fetchAll(); 
-  var result4 = await model.WafLogs.where('function','like',content1).fetchAll(); 
-  var result5 = await model.WafLogs.where('url','like',content1).fetchAll(); 
-  var result6 = await model.WafLogs.where('param','like',content1).fetchAll(); 
-  var result7 = await model.WafLogs.where('result','like',content1).fetchAll(); 
-  
-  for(;len < result2.length;len++){
-    logs[len] = result2.models[len].attributes;
-  }
-  for(;len < result3.length;len++){
-    logs[len] = result3.models[len].attributes;
-  }
-  for(;len < result4.length;len++){
-    logs[len] = result4.models[len].attributes;
-  }
-  for(;len < result5.length;len++){
-    logs[len] = result5.models[len].attributes;
-  }
-  for(;len < result6.length;len++){
-    logs[len] = result6.models[len].attributes;
-  }
-  for(;len < result7.length;len++){
-    logs[len] = result7.models[len].attributes;
-  }
-  ctx.body = {logs,len};
-});
 
 router.get('/import', async function (ctx, next) {
   await ctx.render('import', {
