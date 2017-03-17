@@ -5,9 +5,12 @@ html
     title= title
     link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet' href='/stylesheets/mycss.css')
+    link(rel='stylesheet' href='//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/build/css/bootstrap-datetimepicker.css')
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js')
+    script(src='//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/src/js/bootstrap-datetimepicker.js')  
     script#table-template(type="text/x-handlebars-template").
       {{#each studies}}
         <tr class="success">
@@ -58,7 +61,7 @@ html
         let contract_number = $('#contract_number').val();
         let type = $('#type').val();
         let due_date = $('#due_date').val();
-        let need_audit = $('#need_audit').val();
+        let need_audit = $('input[name="need_audit"]:checked').val();
         if ($.trim(uid) == '') {
           $('#warning1').text('项目uid为必填项！');
           return;
@@ -88,13 +91,6 @@ html
           return;
         } else {
           $('#warning5').text('');
-        }
-        if ($.trim(need_audit) != 'true' && $.trim(need_audit) != 'false') {
-          $('#warning7').text('监查需求必须是boolean值！');
-          return;
-        } else {
-          need_audit == 'true'?true:false;
-          $('#warning7').text('');
           let newStudy = {
             "uid":uid,
             "name":name,
@@ -187,7 +183,7 @@ html
         let contract_number = $('#contract_number_upd').val();
         let type = $('#type_upd').val();
         let due_date = $('#due_date_upd').val();
-        let need_audit = $('#need_audit_upd').val();
+        let need_audit = $('input[name="need_audit_upd"]:checked').val();
         if ($.trim(uid) == '') {
           $('#warning8').text('项目uid为必填项！');
           return;
@@ -217,13 +213,6 @@ html
           return;
         } else {
           $('#warning12').text('');
-        }
-        if ($.trim(need_audit) != 'true' && $.trim(need_audit) != 'false') {
-          $('#warning14').text('监查需求必须是boolean值！');
-          return;
-        } else {
-          need_audit == 'true'?true:false;
-          $('#warning14').text('');
           let newStudy = {
             "id":id,
             "uid":uid,
@@ -330,7 +319,11 @@ html
                 div.form-group
                   label.col-sm-2.control-label 项目状态
                   div.col-sm-7
-                    input.form-control#state_upd(type='text' placeholder='请输入项目地址(必填)',value='')
+                    select.form-control#state_upd
+                      option(value='INIT') INIT
+                      option(value='ONGOING') ONGOING
+                      option(value='LOCKED') LOCKED
+                      option(value='COMPLETE') COMPLETE
                   div.col-sm-3
                     p#warning10(style='color:#ff0000')
                 div.form-group
@@ -342,19 +335,39 @@ html
                 div.form-group
                   label.col-sm-2.control-label 项目类型
                   div.col-sm-7
-                    input.form-control#type_upd(type='text' placeholder='请输入项目状态(必填)',value='') 
+                    select.form-control#type_upd
+                      option(value='随机对照试验(RCT)') 随机对照试验(RCT)
+                      option(value='队列研究') 队列研究
+                      option(value='病例对照研究') 病例对照研究
+                      option(value='注册登记研究') 注册登记研究
+                      option(value='复杂性疾病队列研究') 复杂性疾病队列研究
+                      option(value='横断面研究') 横断面研究
                   div.col-sm-3
                     p#warning12(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 截止日期
                   div.col-sm-7
-                    input.form-control#due_date_upd(type='text' placeholder='请输入截止日期',value='')
+                    div.input-group.date#datetimepicker1
+                      input.form-control#due_date_upd(type='text')
+                      span.input-group-addon
+                        span.glyphicon.glyphicon-calendar
+                  script.
+                    $(function() {
+                      $('#datetimepicker1').datetimepicker({
+                        format:"YYYY/MM/DD"
+                      });
+                    });
                   div.col-sm-3
                     p#warning13(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 监察需求
                   div.col-sm-7
-                    input.form-control#need_audit_upd(type='text' placeholder='请输入监察需求(必填)',value='')
+                    label.radio-inline
+                      input(name='need_audit_upd' type="radio" value='true' checked) 
+                      span 需要
+                    label.radio-inline
+                      input(name='need_audit_upd' type="radio" value='false') 
+                      span 不需要
                   div.col-sm-3
                     p#warning14(style='color:#ff0000')
             div#id_upd(style="display:none") 存储待修改项的id
@@ -399,7 +412,11 @@ html
                 div.form-group
                   label.col-sm-2.control-label 项目状态
                   div.col-sm-7
-                    input.form-control#state(type='text' placeholder='请输入项目地址(必填)',value='')
+                    select.form-control#state
+                      option(value='INIT') INIT
+                      option(value='ONGOING') ONGOING
+                      option(value='LOCKED') LOCKED
+                      option(value='COMPLETE') COMPLETE
                   div.col-sm-3
                     p#warning3(style='color:#ff0000')
                 div.form-group
@@ -411,19 +428,39 @@ html
                 div.form-group
                   label.col-sm-2.control-label 项目类型
                   div.col-sm-7
-                    input.form-control#type(type='text' placeholder='请输入项目状态(必填)',value='') 
+                    select.form-control#type
+                      option(value='随机对照试验(RCT)') 随机对照试验(RCT)
+                      option(value='队列研究') 队列研究
+                      option(value='病例对照研究') 病例对照研究
+                      option(value='注册登记研究') 注册登记研究
+                      option(value='复杂性疾病队列研究') 复杂性疾病队列研究
+                      option(value='横断面研究') 横断面研究
                   div.col-sm-3
                     p#warning5(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 截止日期
                   div.col-sm-7
-                    input.form-control#due_date(type='text' placeholder='请输入截止日期',value='')
+                    div.input-group.date#datetimepicker
+                      input.form-control#due_date(type='text')
+                      span.input-group-addon
+                        span.glyphicon.glyphicon-calendar
+                  script.
+                    $(function() {
+                      $('#datetimepicker').datetimepicker({
+                        format:"YYYY/MM/DD"
+                      });
+                    });
                   div.col-sm-3
                     p#warning6(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 监察需求
                   div.col-sm-7
-                    input.form-control#need_audit(type='text' placeholder='请输入监察需求(必填)',value='')
+                    label.radio-inline
+                      input(name='need_audit' type="radio" value='true' checked) 
+                      span 需要
+                    label.radio-inline
+                      input(name='need_audit' type="radio" value='false') 
+                      span 不需要
                   div.col-sm-3
                     p#warning7(style='color:#ff0000')
             div.modal-footer

@@ -8,6 +8,7 @@ const Managers = ds.bookshelf.Model.extend({
 // Users表示可以登录到这个系统的用户
 const Users = ds.bookshelf.Model.extend({
     tableName: 'users',
+    hasTimestamps: true,
     role: function() {
         return this.hasOne(Roles);
     }
@@ -16,6 +17,7 @@ const Users = ds.bookshelf.Model.extend({
 // Roles表示角色
 const Roles = ds.bookshelf.Model.extend({
     tableName: 'roles',
+    hasTimestamps: true,
     user: function() {
         return this.belongsTo(Users);
     },
@@ -30,6 +32,7 @@ const Roles = ds.bookshelf.Model.extend({
 // Studies表示研究项目
 const Studies = ds.bookshelf.Model.extend({
     tableName: 'studies',
+    hasTimestamps: true,
     role: function() {
         return this.hasOne(Roles);
     },
@@ -41,6 +44,7 @@ const Studies = ds.bookshelf.Model.extend({
 // Sites表示研究机构
 const Sites = ds.bookshelf.Model.extend({
     tableName: 'sites',
+    hasTimestamps: true,
     role: function() {
         return this.hasOne(Roles);
     },
@@ -52,6 +56,7 @@ const Sites = ds.bookshelf.Model.extend({
 // Study_Sites表示项目-机构关系表
 const Study_Sites = ds.bookshelf.Model.extend({
     tableName: 'study_sites',
+    hasTimestamps: true,
     study: function() {
         return this.belongsTo(Studies);
     },
@@ -61,7 +66,8 @@ const Study_Sites = ds.bookshelf.Model.extend({
 });
 // Logs表示系统产生的日志
 const Logs = ds.bookshelf.Model.extend({
-    tableName: 'logs'
+    tableName: 'logs',
+    hasTimestamps: true
 });
 
 

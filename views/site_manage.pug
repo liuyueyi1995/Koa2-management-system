@@ -277,7 +277,11 @@ html
                 div.form-group
                   label.col-sm-2.control-label 机构类型
                   div.col-sm-7
-                    input.form-control#type_upd(type='text' placeholder='请输入机构类型(必填)',value='') 
+                    select.form-control#type_upd
+                      option(value='医疗机构') 医疗机构
+                      option(value='CRO') CRO
+                      option(value='企业') 企业
+                      option(value='监管部门') 监管部门
                   div.col-sm-3
                     p#warning6(style='color:#ff0000')
                 div.form-group
@@ -328,7 +332,11 @@ html
                 div.form-group
                   label.col-sm-2.control-label 机构类型
                   div.col-sm-7
-                    input.form-control#type(type='text' placeholder='请输入机构类型(必填)',value='') 
+                    select.form-control#type
+                      option(value='医疗机构') 医疗机构
+                      option(value='CRO') CRO
+                      option(value='企业') 企业
+                      option(value='监管部门') 监管部门
                   div.col-sm-3
                     p#warning2(style='color:#ff0000')
                 div.form-group

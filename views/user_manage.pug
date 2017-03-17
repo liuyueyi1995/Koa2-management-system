@@ -399,7 +399,10 @@ html
                 div.form-group
                   label.col-sm-2.control-label 状态
                   div.col-sm-7
-                    input.form-control#state_upd(type='text' placeholder='请输入状态',value='')
+                    select.form-control#state_upd
+                      option(value='VERIFIED') VERIFIED
+                      option(value='PENDING') PENDING
+                      option(value='DENY') DENY
             div#id_upd(style="display:none") 存储待修改项的id
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
@@ -470,7 +473,10 @@ html
                 div.form-group
                   label.col-sm-2.control-label 状态
                   div.col-sm-7
-                    input.form-control#state(type='text' placeholder='请输入状态',value='')
+                    select.form-control#state
+                      option(value='VERIFIED') VERIFIED
+                      option(value='PENDING') PENDING
+                      option(value='DENY') DENY
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
               button.btn.btn-primary.btn-add(type='submit') 确认添加

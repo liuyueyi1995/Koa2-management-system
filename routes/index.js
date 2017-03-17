@@ -115,7 +115,7 @@ router.get('/logout', async function (ctx, next) {
  * 查询数据库，并把信息返回至客户端用于显示 
  */ 
 router.get('/user_manage', async function (ctx, next) {
-  var origin_results = await model.Users.fetchAll();
+  var origin_results = await model.Users.query('orderBy', 'id', 'asc').fetchAll();
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -153,7 +153,7 @@ router.post('/user_manage',async function(ctx,next) {
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
-    var results = await model.Users.query(function(qb) {
+    var results = await model.Users.query('orderBy', 'id', 'asc').query(function(qb) {
       qb.where('email','like',content1)
       .orWhere('name','like',content1)
       .orWhere('phone','like',content1)
@@ -227,7 +227,7 @@ router.get('/role_manage', async function (ctx, next) {
   var users = {};
   var ids = {};
   var studies = {};
-  var origin_results = await model.Roles.forge().fetchAll({withRelated:['user','study','site']});
+  var origin_results = await model.Roles.forge().query('orderBy', 'id', 'asc').fetchAll({withRelated:['user','study','site']});
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
       "id":origin_results.models[i].attributes.id,
@@ -243,14 +243,14 @@ router.get('/role_manage', async function (ctx, next) {
       "updatedAt":origin_results.models[i].attributes.updated_at
     }
   }
-  var origin_users = await model.Users.fetchAll();
+  var origin_users = await model.Users.query('orderBy', 'id', 'asc').fetchAll();
   for(var i = 0;i < origin_users.length;i++){
     users[i] = {
       "id": origin_users.models[i].attributes.id,
       "name": origin_users.models[i].attributes.name
     }
   }
-  var origin_studies = await model.Studies.fetchAll();
+  var origin_studies = await model.Studies.query('orderBy', 'id', 'asc').fetchAll();
   for(var i = 0;i < origin_studies.length;i++){
     studies[i] = {
       "id": origin_studies.models[i].attributes.id,
@@ -276,7 +276,7 @@ router.post('/role_manage',async function(ctx,next) {
     var sites = {};
     var id = ctx.request.body.content;
     console.log(id)
-    var origin_results = await model.Study_Sites.where({study_id:id}).fetchAll({withRelated:['study','site']});
+    var origin_results = await model.Study_Sites.where({study_id:id}).query('orderBy', 'id', 'asc').fetchAll({withRelated:['study','site']});
     
     for(var i = 0;i < origin_results.length;i++){
       sites[i] = {
@@ -323,7 +323,7 @@ router.post('/role_manage',async function(ctx,next) {
  * 查询数据库，并把信息返回至客户端用于显示 
  */
 router.get('/study_manage', async function (ctx, next) {
-  var origin_results = await model.Studies.fetchAll();
+  var origin_results = await model.Studies.query('orderBy', 'id', 'asc').fetchAll();
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -359,7 +359,7 @@ router.post('/study_manage',async function(ctx,next) {
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
-    var results = await model.Studies.query(function(qb) {
+    var results = await model.Studies.query('orderBy', 'id', 'asc').query(function(qb) {
       qb.where('uid','like',content1)
       .orWhere('name','like',content1)
       .orWhere('state','like',content1)
@@ -370,13 +370,14 @@ router.post('/study_manage',async function(ctx,next) {
     ctx.body = {studies,len};
 
   } else if (ctx.request.body.action == 2) {
+    console.log(ctx.request.body.content)
     var newStudy = new model.Studies({
       uid: ctx.request.body.content['uid'],
       name: ctx.request.body.content['name'],
       state: ctx.request.body.content['state'],
       contract_number: ctx.request.body.content['contract_number'],
       type: ctx.request.body.content['type'],
-      due_date: null,
+      due_date:  ctx.request.body.content['due_date'],
       need_audit: ctx.request.body.content['need_audit']
     });
     newStudy.save();
@@ -391,6 +392,7 @@ router.post('/study_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
+    console.log(content)
     new model.Studies({id: ctx.request.body.content['id']})
     .save({
       uid: ctx.request.body.content['uid'],
@@ -398,7 +400,7 @@ router.post('/study_manage',async function(ctx,next) {
       state: ctx.request.body.content['state'],
       contract_number: ctx.request.body.content['contract_number'],
       type: ctx.request.body.content['type'],
-      due_date: null,
+      due_date: ctx.request.body.content['due_date'],
       need_audit: ctx.request.body.content['need_audit']
     }, {patch: true});
     let ret = '修改成功！';
@@ -412,7 +414,7 @@ router.post('/study_manage',async function(ctx,next) {
  * 查询数据库，并把信息返回至客户端用于显示 
  */ 
 router.get('/site_manage', async function (ctx, next) {
-  var origin_results = await model.Sites.fetchAll();
+  var origin_results = await model.Sites.query('orderBy', 'id', 'asc').fetchAll();
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -445,7 +447,7 @@ router.post('/site_manage',async function(ctx,next) {
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
-    var results = await model.Sites.query(function(qb) {
+    var results = await model.Sites.query('orderBy', 'id', 'asc').query(function(qb) {
       qb.where('name','like',content1)
       .orWhere('type','like',content1)
       .orWhere('address','like',content1)
