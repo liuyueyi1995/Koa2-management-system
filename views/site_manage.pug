@@ -42,6 +42,29 @@ html
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的机构?');
             $('#del_id').html($(this).attr("data-id"));
           });
+          $('body').on('click','.page',function() {
+            let page = $(this).attr("page");
+            if (page == 'first') {
+              fetch_num = 1
+            } else if (page == 'last') {
+              fetch_num = $(this).attr("page_max")
+            } else {
+              fetch_num = $(this).attr("page")
+            }
+            $.ajax(
+              {
+                url:'/site_manage',
+                data:{content:fetch_num,action:0},
+                type:"post",
+                success: function(result) {
+                  let tbody = $('tbody');
+                  tbody.html("");
+                  var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
+                  $("tbody").html(tableTemplate(result));
+                }
+              }
+            );
+          });
         });
       });
         
@@ -248,7 +271,7 @@ html
               th 修改
               th 删除
           tbody
-            each result in results
+            each result in results.results
               tr
               each val in result
                 td.success #{val}
@@ -258,7 +281,15 @@ html
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
-      
+      //分页组件
+      div.row(style="text-align:center;")
+        ul.pagination(style="margin:0 auto;")
+          li.page(page="first")
+            a &laquo;
+          - for (var i = 1; i < results.page_num+1; i++)
+            li.page(page=i): a #{i}
+          li.page(page="last" page_max=results.page_num)
+            a &raquo;
       //修改机构信息的模态框
       div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
         div.modal-dialog
