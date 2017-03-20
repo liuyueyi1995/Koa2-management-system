@@ -94,6 +94,29 @@ html
               }
             );
           }); 
+          $('body').on('click','.page',function() {
+            let page = $(this).attr("page");
+            if (page == 'first') {
+              fetch_num = 1
+            } else if (page == 'last') {
+              fetch_num = $(this).attr("page_max")
+            } else {
+              fetch_num = $(this).attr("page")
+            }
+            $.ajax(
+              {
+                url:'/role_manage',
+                data:{content:fetch_num,action:5},
+                type:"post",
+                success: function(result) {
+                  let tbody = $('tbody');
+                  tbody.html("");
+                  var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
+                  $("tbody").html(tableTemplate(result));
+                }
+              }
+            );
+          });
         });
       });
       function add() {
@@ -283,6 +306,15 @@ html
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
+      //分页组件
+      div.row(style="text-align:center;")
+        ul.pagination(style="margin:0 auto;")
+          li.page(page="first")
+            a &laquo;
+          - for (var i = 1; i < results.page_num+1; i++)
+            li.page(page=i): a #{i}
+          li.page(page="last" page_max=results.page_num)
+            a &raquo;
       //修改角色的模态框
       div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
         div.modal-dialog

@@ -249,7 +249,13 @@ router.get('/role_manage', async function (ctx, next) {
   var users = {};
   var ids = {};
   var studies = {};
-  var origin_results = await model.Roles.forge().query('orderBy', 'id', 'asc').fetchAll({withRelated:['user','study','site']});
+  var total_num = await model.Roles.count();
+  var page_num = Math.ceil(total_num/10);
+  var origin_results = await model.Roles.forge().query('orderBy', 'id', 'asc').fetchPage({
+      page: 1,
+      pageSize: 10,
+      withRelated:['user','study','site']
+    });
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
       "id":origin_results.models[i].attributes.id,
@@ -278,7 +284,7 @@ router.get('/role_manage', async function (ctx, next) {
   }
   await ctx.render('role_manage', {
     title: 'EVA管理平台-角色管理',
-    results: {results,users,studies,ids}
+    results: {results,users,studies,ids,page_num}
   });
 });
 
@@ -290,6 +296,7 @@ router.get('/role_manage', async function (ctx, next) {
  * 2 - 添加角色信息
  * 3 - 删除角色信息
  * 4 - 修改
+ * 5 - 分页显示
  */
 router.post('/role_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) { 
@@ -309,7 +316,10 @@ router.post('/role_manage',async function(ctx,next) {
       .orWhere('studies.name','like',content1)
       .orWhere('roles.state','like',content1)
       .orWhere('roles.type','like',content1)
-    }).query('orderBy', 'roles.id', 'asc').fetchAll();
+    }).query('orderBy', 'roles.id', 'asc').fetchPage({
+      page: 1,
+      pageSize: 10
+    });
     for(;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
     }
@@ -359,6 +369,24 @@ router.post('/role_manage',async function(ctx,next) {
     let ret = '状态修改成功！';
     ctx.body = {ret};
 
+  } else if (ctx.request.body.action == 5) {
+    var roles = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var results = await model.Roles.query(function(qb) {
+      qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
+      .leftJoin('users','roles.user_id','users.id')
+      .leftJoin('studies','roles.study_id','studies.id')
+      .leftJoin('sites','roles.site_id','sites.id')
+    }).query('orderBy', 'roles.id', 'asc').fetchPage({
+      page: content,
+      pageSize: 10
+    });
+    for(;len < results.length;len++) {
+      roles[len] = results.models[len].attributes;
+    }
+    ctx.body = {roles,len};
   }
 });
 
@@ -575,21 +603,6 @@ router.post('/site_manage',async function(ctx,next) {
 
   }
 });
-
-/**------------------------------------------------------------- */
-// 日志管理
-router.get('/log_manage', async function (ctx, next) {
-  var origin_logs = await model.Logs.fetchAll();//从数据库中查询所有的日志信息
-  var logs = {};
-  for(var i = 0;i < origin_logs.length;i++){
-    logs[i] = origin_logs.models[i].attributes;
-  }
-  await ctx.render('log_manage', {
-    title: 'EVA管理平台-日志管理',
-    logs: logs
-  });
-});
-
 
 router.get('/import', async function (ctx, next) {
   await ctx.render('import', {
