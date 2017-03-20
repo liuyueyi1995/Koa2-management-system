@@ -8,14 +8,24 @@ html
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script#table-template(type="text/x-handlebars-template").
+      {{#each roles}}
+        <tr class="success">
+          <td>{{id}}</td>
+          <td>{{user_name}}</td>
+          <td>{{study_name}}</td>
+          <td>{{site_name}}</td>
+          <td>{{type}}</td>
+          <td>{{state}}</td>
+          <td>{{created_at}}</td>
+          <td>{{updated_at}}</td>
+          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"user_name":"{{user_name}}","study_name":"{{study_name}}","site_name":"{{site_name}}","type":"{{type}}","state":"{{state}}"}'>修改</button></td>
+          <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
+        </tr>
+      {{/each}}
     script.
       $(function (){
         $(document).ready(function(){
-          $('tbody tr').each(function() {
-            $(this).children("td:eq(4)").addClass('hidden');
-            $(this).children("td:eq(5)").addClass('hidden');
-            $(this).children("td:eq(6)").addClass('hidden');
-          });
           $('.btn-add').click(add); //搜索栏的添加按钮 触发ajax
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
           $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
@@ -104,12 +114,6 @@ html
         } else {
           $('#warning2').text('');
         } 
-        if ($.trim(site) == '') {
-          $('#warning3').text('机构名称为必填项！');
-          return;
-        } else {
-          $('#warning3').text('');
-        } 
         if ($.trim(type) == '') {
           $('#warning4').text('角色类型为必填项！');
           return;
@@ -182,22 +186,28 @@ html
         );
       }
       function search() {
-        /** 因为roles表查询涉及外键和真实值之间的转换，逻辑比较复杂，
-         *  这里改成通过字符串模式匹配，将不匹配的行隐藏，达到搜索效果
-         */
         let content = $.trim($('#searchBox').val());
+        console.log(content)
         if (content) {
-          $('tbody tr').addClass('hidden');
-          $('tbody td').each(function() {
-            var text = $(this).html();
-            if (text.indexOf(content) != -1) {
-              $(this).parent().removeClass('hidden');
-            } 
+          $.post('/role_manage',{content:content,action:0},function(result){
+            console.log(result)
+            let length = result.len;
+            if ($.isEmptyObject(result.roles)) { //如果没有查询到数据则返回提示
+              alert(`
+              No result matched the given condition!
+
+              Please retry!`);
+            } else { //如果查询到数据则动态生成表格               
+              let tbody = $('tbody');
+              tbody.html("");
+              var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
+              $("tbody").html(tableTemplate(result));
+            }
           });
         } else {
           alert('There is no condition!');
         }
-      }
+      } 
       function update() {
         let id = $('#id_upd').val();
         let state = $('#state_upd').val();
@@ -242,8 +252,7 @@ html
           li.float-right.col-lg-3.nonpadding
             div.input-group
               span.input-group-btn
-                - var users = results.users
-                - var studies = results.studies
+                - var users = results.users,studies = results.studies
                 button.btn.btn-warning.btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加角色信息
               input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn

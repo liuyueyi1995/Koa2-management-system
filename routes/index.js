@@ -234,9 +234,6 @@ router.get('/role_manage', async function (ctx, next) {
       "user_name":origin_results.models[i].relations.user.attributes.name,
       "study_name":origin_results.models[i].relations.study.attributes.name,
       "site_name":origin_results.models[i].relations.site.attributes.name,
-      "user_id":origin_results.models[i].relations.user.attributes.id,
-      "study_id":origin_results.models[i].relations.study.attributes.id,
-      "site_id":origin_results.models[i].relations.site.attributes.id,
       "type":origin_results.models[i].attributes.type,
       "state":origin_results.models[i].attributes.state,
       "createdAt":origin_results.models[i].attributes.created_at,
@@ -266,13 +263,38 @@ router.get('/role_manage', async function (ctx, next) {
 /**采用AJAX处理对前端发回的请求
  * 角色管理页
  * 根据action值的不同完成对应的操作：
+ * 0 - 模糊搜索
  * 1 - 根据项目id查询出参与该项目的所有机构信息 
  * 2 - 添加角色信息
  * 3 - 删除角色信息
  * 4 - 修改
  */
 router.post('/role_manage',async function(ctx,next) { 
-  if (ctx.request.body.action == 1) {
+  if (ctx.request.body.action == 0) { 
+    var roles = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var content1 = '%'+content+'%'; 
+    console.log(content1)
+    var results = await model.Roles.query(function(qb) {
+      qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
+      .leftJoin('users','roles.user_id','users.id')
+      .leftJoin('studies','roles.study_id','studies.id')
+      .leftJoin('sites','roles.site_id','sites.id')
+      .where('users.name','like',content1)
+      .orWhere('sites.name','like',content1)
+      .orWhere('studies.name','like',content1)
+      .orWhere('roles.state','like',content1)
+      .orWhere('roles.type','like',content1)
+    }).query('orderBy', 'roles.id', 'asc').fetchAll();
+    for(;len < results.length;len++) {
+      roles[len] = results.models[len].attributes;
+    }
+    console.log(roles)
+    ctx.body = {roles,len};
+
+  } else if (ctx.request.body.action == 1) {
     var sites = {};
     var id = ctx.request.body.content;
     console.log(id)
