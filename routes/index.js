@@ -345,7 +345,12 @@ router.post('/role_manage',async function(ctx,next) {
  * 查询数据库，并把信息返回至客户端用于显示 
  */
 router.get('/study_manage', async function (ctx, next) {
-  var origin_results = await model.Studies.query('orderBy', 'id', 'asc').fetchAll();
+  var origin_results = await model.Studies.query('orderBy', 'id', 'asc').fetchPage({
+      page: 1,
+      pageSize: 10
+    });
+  var total_num = await model.Studies.count();
+  var page_num = Math.ceil(total_num/10);
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -361,22 +366,37 @@ router.get('/study_manage', async function (ctx, next) {
       "updatedAt":origin_results.models[i].attributes.updated_at
     }
   }
+  console.log(page_num)
   await ctx.render('study_manage', {
     title: 'EVA管理平台-项目管理',
-    results: results
+    results: {results,page_num}
   });
 });
 
 /**采用AJAX处理对前端发回的请求
  * 项目管理页
  * 根据action值的不同完成对应的操作：
+ * 0 - 换页显示
  * 1 - 模糊搜索
  * 2 - 添加新项目
  * 3 - 删除项目
  * 4 - 修改
  */
 router.post('/study_manage',async function(ctx,next) { 
-  if (ctx.request.body.action == 1) {
+  if (ctx.request.body.action == 0) {
+    var studies = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var results = await model.Studies.query('orderBy', 'id', 'asc').fetchPage({
+      page: content,
+      pageSize: 10
+    });
+    for(;len < results.length;len++){
+      studies[len] = results.models[len].attributes;
+    }
+    ctx.body = {studies,len};
+
+  } else if (ctx.request.body.action == 1) {
     var studies = {};
     var len = 0;
     var content = ctx.request.body.content;

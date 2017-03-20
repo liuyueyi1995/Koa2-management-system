@@ -10,6 +10,7 @@ const knex = require('knex')({
     }
 });
 const bookshelf = require('bookshelf')(knex);
+bookshelf.plugin('bookshelf-page');
 
 module.exports = {
     knex: knex,
