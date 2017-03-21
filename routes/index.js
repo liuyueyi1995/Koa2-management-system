@@ -147,7 +147,7 @@ router.get('/user_manage', async function (ctx, next) {
  * 2 - 添加新用户
  * 3 - 删除用户
  * 4 - 修改基本信息
- * 5 - 对搜索结果的分页显示 暂未实现
+ * 5 - 对搜索结果的分页显示
  * 6 - 重置密码
  */
 router.post('/user_manage',async function(ctx,next) { 
@@ -322,7 +322,7 @@ router.post('/role_manage',async function(ctx,next) {
   if (ctx.request.body.action == 0) { 
     var roles = {};
     var len = 0;
-    var content = ctx.request.body.content;
+    var content = ctx.request.body.content.page;
     var results = await model.Roles.query(function(qb) {
       qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
       .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
@@ -368,7 +368,6 @@ router.post('/role_manage',async function(ctx,next) {
       user_id: ctx.request.body.content['user'],
       study_id: ctx.request.body.content['study'],
       site_id: ctx.request.body.content['site'],
-      //site_id: null,
       type: ctx.request.body.content['type'],
       state: ctx.request.body.content['state']
     });
@@ -392,6 +391,31 @@ router.post('/role_manage',async function(ctx,next) {
     let ret = '状态修改成功！';
     ctx.body = {ret};
 
+  } else if (ctx.request.body.action == 5) {
+    var roles = {};
+    var len = 0;
+    var content = ctx.request.body.content.search_content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Roles.query(function(qb) {
+      qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
+      .leftJoin('users','roles.user_id','users.id')
+      .leftJoin('studies','roles.study_id','studies.id')
+      .leftJoin('sites','roles.site_id','sites.id')
+      .where('users.name','like',content1)
+      .orWhere('sites.name','like',content1)
+      .orWhere('studies.name','like',content1)
+      .orWhere('roles.state','like',content1)
+      .orWhere('roles.type','like',content1)
+    }).query('orderBy', 'roles.id', 'asc').fetchPage({
+      page: ctx.request.body.content.page,
+      pageSize: 10
+    });
+    for(;len < results.length;len++){
+      roles[len] = results.models[len].attributes;
+    }
+    ctx.body = {roles,len};
+    
   } else if (ctx.request.body.action == 7) {
     var sites = {};
     var id = ctx.request.body.content;
@@ -453,7 +477,7 @@ router.post('/study_manage',async function(ctx,next) {
   if (ctx.request.body.action == 0) {
     var studies = {};
     var len = 0;
-    var content = ctx.request.body.content;
+    var content = ctx.request.body.content.page;
     var results = await model.Studies.query('orderBy', 'id', 'asc').fetchPage({
       page: content,
       pageSize: 10
@@ -472,7 +496,10 @@ router.post('/study_manage',async function(ctx,next) {
       qb.where('uid','like',content1)
       .orWhere('name','like',content1)
       .orWhere('state','like',content1)
-    }).fetchAll();
+    }).fetchPage({
+      page: 1,
+      pageSize: 10
+    });
     for(;len < results.length;len++){
       studies[len] = results.models[len].attributes;
     }
@@ -513,6 +540,24 @@ router.post('/study_manage',async function(ctx,next) {
     let ret = '修改成功！';
     ctx.body = {ret};
 
+  } else if (ctx.request.body.action == 5) {
+    var studies = {};
+    var len = 0;
+    var content = ctx.request.body.content.search_content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Studies.query('orderBy', 'id', 'asc').query(function(qb) {
+      qb.where('uid','like',content1)
+      .orWhere('name','like',content1)
+      .orWhere('state','like',content1)
+    }).fetchPage({
+      page: ctx.request.body.content.page,
+      pageSize: 10
+    });
+    for(;len < results.length;len++){
+      studies[len] = results.models[len].attributes;
+    }
+    ctx.body = {studies,len};
+    
   }
 });
 
@@ -559,7 +604,7 @@ router.post('/site_manage',async function(ctx,next) {
   if (ctx.request.body.action == 0) {
     var sites = {};
     var len = 0;
-    var content = ctx.request.body.content;
+    var content = ctx.request.body.content.page;
     var results = await model.Sites.query('orderBy', 'id', 'asc').fetchPage({
       page: content,
       pageSize: 10
@@ -616,6 +661,25 @@ router.post('/site_manage',async function(ctx,next) {
     }, {patch: true});
     let ret = '修改成功！';
     ctx.body = {ret};
+
+  } else if (ctx.request.body.action == 5) {
+    var sites = {};
+    var len = 0;
+    var content = ctx.request.body.content.search_content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Sites.query('orderBy', 'id', 'asc').query(function(qb) {
+      qb.where('name','like',content1)
+      .orWhere('type','like',content1)
+      .orWhere('address','like',content1)
+      .orWhere('code','like',content1)
+    }).fetchPage({
+      page: ctx.request.body.content.page,
+      pageSize: 10
+    });
+    for(;len < results.length;len++){
+      sites[len] = results.models[len].attributes;
+    }
+    ctx.body = {sites,len};
 
   }
 });

@@ -54,6 +54,8 @@ html
             $('#del_id').html($(this).attr("data-id"));
           });
           $('body').on('click','.page',function() {
+            $(this).siblings().removeClass('active');
+            $(this).addClass('active');
             let page = $(this).attr("page");
             let search_content = $('#searchBox').val();
             let action = 0;
