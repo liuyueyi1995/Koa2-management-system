@@ -7,10 +7,15 @@ var model = require('../models');
 /**------------------------------------------------------------- */
 // 主页
 router.get('/', async function (ctx, next) {
-  await ctx.render('index', {
-    title: 'EVA管理平台',
-    user: ctx.session.user
-  });
+  if (ctx.session.user) {
+    await ctx.render('index', {
+      title: 'EVA管理平台',
+      user: ctx.session.user
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
+  
 });
 // 默认的欢迎页
 router.get('/default', async function (ctx, next) {
@@ -90,8 +95,7 @@ router.post('/login', async function (ctx, next) {
     if (user.attributes.password == password) {
       console.log('登陆成功！'+ user.attributes.username);
       ctx.session.user = user.attributes.username;
-      //console.log(currentUser);
-      return ctx.response.redirect('/');
+      return ctx.response.redirect('/'); 
     } else {
       console.log('密码错误！');
       //return ctx.response.redirect('/login');
@@ -108,9 +112,7 @@ router.get('/logout', async function (ctx, next) {
   return ctx.redirect('/');
 });
 
-
-
-/**
+/**-------------------------------------------------------------
  * 用户管理页
  * 查询数据库，并把信息返回至客户端用于显示 
  */ 
@@ -240,7 +242,7 @@ router.post('/user_manage',async function(ctx,next) {
 });
 
 
-/**
+/**-------------------------------------------------------------
  * 角色管理页
  * 查询数据库，并把信息返回至客户端用于显示 
  */
@@ -304,7 +306,6 @@ router.post('/role_manage',async function(ctx,next) {
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
-    console.log(content1)
     var results = await model.Roles.query(function(qb) {
       qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
       .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
@@ -323,13 +324,11 @@ router.post('/role_manage',async function(ctx,next) {
     for(;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
     }
-    console.log(roles)
     ctx.body = {roles,len};
 
   } else if (ctx.request.body.action == 1) {
     var sites = {};
     var id = ctx.request.body.content;
-    console.log(id)
     var origin_results = await model.Study_Sites.where({study_id:id}).query('orderBy', 'id', 'asc').fetchAll({withRelated:['study','site']});
     
     for(var i = 0;i < origin_results.length;i++){
@@ -338,7 +337,6 @@ router.post('/role_manage',async function(ctx,next) {
         "name": origin_results.models[i].relations.site.attributes.name
       }
     }
-    console.log(sites)
     ctx.body = {sites};
 
   } else if (ctx.request.body.action == 2) {
@@ -361,7 +359,6 @@ router.post('/role_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
-    console.log(content)
     new model.Roles({id: ctx.request.body.content['id']})
     .save({
       state: ctx.request.body.content['state']
@@ -390,7 +387,7 @@ router.post('/role_manage',async function(ctx,next) {
   }
 });
 
-/**
+/**-------------------------------------------------------------
  * 项目管理页
  * 查询数据库，并把信息返回至客户端用于显示 
  */
@@ -416,7 +413,6 @@ router.get('/study_manage', async function (ctx, next) {
       "updatedAt":origin_results.models[i].attributes.updated_at
     }
   }
-  console.log(page_num)
   await ctx.render('study_manage', {
     title: 'EVA管理平台-项目管理',
     results: {results,page_num}
@@ -462,7 +458,6 @@ router.post('/study_manage',async function(ctx,next) {
     ctx.body = {studies,len};
 
   } else if (ctx.request.body.action == 2) {
-    console.log(ctx.request.body.content)
     var newStudy = new model.Studies({
       uid: ctx.request.body.content['uid'],
       name: ctx.request.body.content['name'],
@@ -484,7 +479,6 @@ router.post('/study_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
-    console.log(content)
     new model.Studies({id: ctx.request.body.content['id']})
     .save({
       uid: ctx.request.body.content['uid'],
@@ -501,7 +495,7 @@ router.post('/study_manage',async function(ctx,next) {
   }
 });
 
-/**
+/**-------------------------------------------------------------
  * 机构管理页
  * 查询数据库，并把信息返回至客户端用于显示 
  */ 
@@ -604,12 +598,27 @@ router.post('/site_manage',async function(ctx,next) {
   }
 });
 
+/**-------------------------------------------------------------
+ * 日志管理页
+ */ 
+router.get('/log_manage', async function (ctx, next) {
+  await ctx.render('log_manage', {
+    title: 'EVA管理平台-日志管理'
+  });
+});
+
+/**-------------------------------------------------------------
+ * 数据导入页
+ */ 
 router.get('/import', async function (ctx, next) {
   await ctx.render('import', {
     title: 'EVA管理平台-数据导入'
   });
 });
 
+/**-------------------------------------------------------------
+ * 相关设置页
+ */ 
 router.get('/settings', async function (ctx, next) {
   await ctx.render('settings', {
     title: 'EVA管理平台-相关设置'

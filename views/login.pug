@@ -15,6 +15,10 @@ html
           p.title=title
       div.row
         include alert.pug
+    div(style="width:60%;float:left")
+      br
+      p(style="color:aliceblue;font-size:48px;margin-left:10px") Welcome #{user}!
+      p(style="color:aliceblue;font-size:36px;margin-left:10px") This is a koa2-based background management system.
     div.loginbox
       form(method='post')
         div.userbox
@@ -25,3 +29,6 @@ html
           input#password.inputuser(name='password', tabindex='2', placeholder='请输入管理员密码', type='password', value='', size='25', autocomplete='false',required)
         div.btnbox
           input.submitbtn(type='submit', value='登录')
+        div(style="padding-top:20px")
+          span(style="color:white") 没有账号？   
+            a(href="/reg" target="_self") 注册

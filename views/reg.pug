@@ -15,6 +15,10 @@ html
           p.title=title
       div.row
         include alert.pug
+    div(style="width:60%;float:left")
+      br
+      p(style="color:aliceblue;font-size:48px;margin-left:10px") Welcome #{user}!
+      p(style="color:aliceblue;font-size:36px;margin-left:10px") This is a koa2-based background management system.
     div.loginbox
       form(method='post')
         div.userbox

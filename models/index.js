@@ -1,11 +1,11 @@
 var ds = require('../datasource');
 
-// Users表示可以登录到这个系统的用户
+// Managers表示可以登录到后台管理系统的用户
 const Managers = ds.bookshelf.Model.extend({
     tableName: 'background_managers'
 });
 
-// Users表示可以登录到这个系统的用户
+// Users表示可以登录到EVA的用户
 const Users = ds.bookshelf.Model.extend({
     tableName: 'users',
     hasTimestamps: true,
