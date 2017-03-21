@@ -55,6 +55,8 @@ html
           });
           $('body').on('click','.page',function() {
             let page = $(this).attr("page");
+            let search_content = $('#searchBox').val();
+            let action = 0;
             if (page == 'first') {
               fetch_num = 1
             } else if (page == 'last') {
@@ -62,10 +64,17 @@ html
             } else {
               fetch_num = $(this).attr("page")
             }
+            if (search_content) {
+              action = 5;
+            }
+            let content = {
+              page: page,
+              search_content: search_content
+            }
             $.ajax(
               {
                 url:'/user_manage',
-                data:{content:fetch_num,action:0},
+                data:{content:content,action:action},
                 type:"post",
                 success: function(result) {
                   let tbody = $('tbody');
@@ -113,7 +122,7 @@ html
         } else {
           $('#warning4').text('');
         }
-        if ($.trim(password)  != $.trim(password_confirm)) {
+        if ($.trim(password) != $.trim(password_confirm)) {
           $('#warning2').text('两次输入密码不相同！');
           $('#warning3').text('两次输入密码不相同！');
         } else {
@@ -286,7 +295,7 @@ html
           $.ajax(
             {
               url:'/user_manage',
-              data:{content:info,action:5},
+              data:{content:info,action:6},
               type:"post",
               beforeSend: function() {
                 $("#tips3").html("<span style='color:blue'>正在处理...</span>");

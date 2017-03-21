@@ -40,7 +40,6 @@ router.post('/reg', async function (ctx, next) {
     });
   } else if(ctx.request.body['password2'] !== ctx.request.body['password']) {
     //判断两次密码是否一致
-    console.log('两次密码不一致');
     await ctx.render('reg', {
       title: 'EVA管理平台-注册',
       error: '两次密码不一致'
@@ -49,7 +48,6 @@ router.post('/reg', async function (ctx, next) {
     //判断用户名是否存在
     var count = await model.Managers.where('username', ctx.request.body['username']).count('username');
     if(count != 0) {
-      console.log('用户名已存在！');
       await ctx.render('reg', {
         title: 'EVA管理平台-注册',
         error: '用户名已存在'
@@ -62,7 +60,6 @@ router.post('/reg', async function (ctx, next) {
         password: password
       });
       await newUser.save();
-      console.log('注册成功，可以直接登录！');
       ctx.session.user = newUser;
       await ctx.render('reg', {
         title: 'EVA管理平台-注册',
@@ -83,7 +80,6 @@ router.post('/login', async function (ctx, next) {
   //需要判断的逻辑：用户名不存在或者密码错误
   var count = await model.Managers.where('username', ctx.request.body['username']).count('username');
   if(count == 0) {
-    console.log('用户名不存在！');
     await ctx.render('login', {
       title: 'EVA管理平台-登录',
       error: '用户名不存在'
@@ -93,11 +89,9 @@ router.post('/login', async function (ctx, next) {
     var password = hmac.update(ctx.request.body['password']).digest('hex');
     var user = await model.Managers.where('username', ctx.request.body['username']).fetch();
     if (user.attributes.password == password) {
-      console.log('登陆成功！'+ user.attributes.username);
       ctx.session.user = user.attributes.username;
       return ctx.response.redirect('/'); 
     } else {
-      console.log('密码错误！');
       //return ctx.response.redirect('/login');
       await ctx.render('login', {
         title: 'EVA管理平台-登录',
@@ -153,13 +147,14 @@ router.get('/user_manage', async function (ctx, next) {
  * 2 - 添加新用户
  * 3 - 删除用户
  * 4 - 修改基本信息
- * 5 - 重置密码
+ * 5 - 对搜索结果的分页显示 暂未实现
+ * 6 - 重置密码
  */
 router.post('/user_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) {
     var users = {};
     var len = 0;
-    var content = ctx.request.body.content;
+    var content = ctx.request.body.content.page;
     var results = await model.Users.query('orderBy', 'id', 'asc').fetchPage({
       page: content,
       pageSize: 10
@@ -230,6 +225,28 @@ router.post('/user_manage',async function(ctx,next) {
     ctx.body = {ret};
 
   } else if (ctx.request.body.action == 5) {
+    var users = {};
+    var len = 0;
+    var content = ctx.request.body.content.search_content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Users.query('orderBy', 'id', 'asc').query(function(qb) {
+      qb.where('email','like',content1)
+      .orWhere('name','like',content1)
+      .orWhere('phone','like',content1)
+      .orWhere('address','like',content1)
+      .orWhere('site','like',content1)
+      .orWhere('title','like',content1)
+      .orWhere('state','like',content1)
+    }).fetchPage({
+      page: ctx.request.body.content.page,
+      pageSize: 10
+    });
+    for(;len < results.length;len++){
+      users[len] = results.models[len].attributes;
+    }
+    ctx.body = {users,len};
+    
+  } else if (ctx.request.body.action == 6) {
     var content = ctx.request.body.content;
     var password = bcrypt.hashSync(ctx.request.body.content['password'],9);
     new model.Users({id: ctx.request.body.content['id']})
@@ -293,15 +310,35 @@ router.get('/role_manage', async function (ctx, next) {
 /**采用AJAX处理对前端发回的请求
  * 角色管理页
  * 根据action值的不同完成对应的操作：
- * 0 - 模糊搜索
- * 1 - 根据项目id查询出参与该项目的所有机构信息 
+ * 0 - 分页显示 
+ * 1 - 模糊搜索 
  * 2 - 添加角色信息
  * 3 - 删除角色信息
  * 4 - 修改
- * 5 - 分页显示
+ * 5 - 对搜索结果的分页显示 暂未实现
+ * 7 - 根据项目id查询出参与该项目的所有机构信息
  */
 router.post('/role_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) { 
+    var roles = {};
+    var len = 0;
+    var content = ctx.request.body.content;
+    var results = await model.Roles.query(function(qb) {
+      qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
+      .leftJoin('users','roles.user_id','users.id')
+      .leftJoin('studies','roles.study_id','studies.id')
+      .leftJoin('sites','roles.site_id','sites.id')
+    }).query('orderBy', 'roles.id', 'asc').fetchPage({
+      page: content,
+      pageSize: 10
+    });
+    for(;len < results.length;len++) {
+      roles[len] = results.models[len].attributes;
+    }
+    ctx.body = {roles,len};
+
+  } else if (ctx.request.body.action == 1) {
     var roles = {};
     var len = 0;
     var content = ctx.request.body.content;
@@ -326,27 +363,16 @@ router.post('/role_manage',async function(ctx,next) {
     }
     ctx.body = {roles,len};
 
-  } else if (ctx.request.body.action == 1) {
-    var sites = {};
-    var id = ctx.request.body.content;
-    var origin_results = await model.Study_Sites.where({study_id:id}).query('orderBy', 'id', 'asc').fetchAll({withRelated:['study','site']});
-    
-    for(var i = 0;i < origin_results.length;i++){
-      sites[i] = {
-        "id": origin_results.models[i].relations.site.attributes.id,
-        "name": origin_results.models[i].relations.site.attributes.name
-      }
-    }
-    ctx.body = {sites};
-
   } else if (ctx.request.body.action == 2) {
     var newRole = new model.Roles({
       user_id: ctx.request.body.content['user'],
       study_id: ctx.request.body.content['study'],
       site_id: ctx.request.body.content['site'],
+      //site_id: null,
       type: ctx.request.body.content['type'],
       state: ctx.request.body.content['state']
     });
+    console.log(ctx.request.body.content['site']);
     newRole.save();
     let ret = '添加成功！';
     ctx.body = {ret};
@@ -366,24 +392,18 @@ router.post('/role_manage',async function(ctx,next) {
     let ret = '状态修改成功！';
     ctx.body = {ret};
 
-  } else if (ctx.request.body.action == 5) {
-    var roles = {};
-    var len = 0;
-    var content = ctx.request.body.content;
-    var results = await model.Roles.query(function(qb) {
-      qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
-      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.created_at','roles.updated_at')
-      .leftJoin('users','roles.user_id','users.id')
-      .leftJoin('studies','roles.study_id','studies.id')
-      .leftJoin('sites','roles.site_id','sites.id')
-    }).query('orderBy', 'roles.id', 'asc').fetchPage({
-      page: content,
-      pageSize: 10
-    });
-    for(;len < results.length;len++) {
-      roles[len] = results.models[len].attributes;
+  } else if (ctx.request.body.action == 7) {
+    var sites = {};
+    var id = ctx.request.body.content;
+    var origin_results = await model.Study_Sites.where({study_id:id}).query('orderBy', 'id', 'asc').fetchAll({withRelated:['study','site']});
+    
+    for(var i = 0;i < origin_results.length;i++){
+      sites[i] = {
+        "id": origin_results.models[i].relations.site.attributes.id,
+        "name": origin_results.models[i].relations.site.attributes.name
+      }
     }
-    ctx.body = {roles,len};
+    ctx.body = {sites};
   }
 });
 
@@ -427,6 +447,7 @@ router.get('/study_manage', async function (ctx, next) {
  * 2 - 添加新项目
  * 3 - 删除项目
  * 4 - 修改
+ * 5 - 对搜索结果的分页显示 暂未实现
  */
 router.post('/study_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) {
@@ -532,6 +553,7 @@ router.get('/site_manage', async function (ctx, next) {
  * 2 - 添加新机构
  * 3 - 删除机构
  * 4 - 修改
+ * 5 - 对搜索结果的分页显示 暂未实现
  */
 router.post('/site_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) {
