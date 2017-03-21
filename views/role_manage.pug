@@ -63,37 +63,44 @@ html
               option.appendTo(select_study); //添加节点
             }
           });
-          $('body').on('change','#study',function(){//级联下拉菜单，当选中的项目改变时，触发ajax修改机构信息
-            let id = $(this).val();
-            $.ajax(
-              {
-                url:'/role_manage',
-                data:{content:id,action:7},
-                type:"post",
-                beforeSend: function() {
-                  $("#tips").html("<span style='color:blue'>正在处理...</span>");
-                },
-                success: function(result) {
-                  if (result) {
-                    let select_site = $('#site');
-                    select_site.html(""); //先清空下拉选项
-                    for(var item in result.sites){ //item是下标
-                      let option = $('<option value='+ result.sites[item].id +'>'+ result.sites[item].name+'</option>');
-                      option.appendTo(select_site); //添加节点
+          $('body').on('change','#type',function(){//级联下拉菜单，当选中的项目改变时，触发ajax修改机构信息
+            let type = $(this).val();
+            let id = $('#study').val();
+            if (type == 'STUDY_ADMIN') {
+              $('#site').val('').attr('disabled','true');
+            } else {
+              $('#site').removeAttr('disabled');
+              $.ajax(
+                {
+                  url:'/role_manage',
+                  data:{content:id,action:7},
+                  type:"post",
+                  beforeSend: function() {
+                    $("#tips").html("<span style='color:blue'>正在处理...</span>");
+                  },
+                  success: function(result) {
+                    if (result) {
+                      let select_site = $('#site');
+                      select_site.html(""); //先清空下拉选项
+                      for(var item in result.sites){ //item是下标
+                        let option = $('<option value='+ result.sites[item].id +'>'+ result.sites[item].name+'</option>');
+                        option.appendTo(select_site); //添加节点
+                      }
+                    } else {
+                      $("#tips").html("<span style='color:blue'>出现错误！</span>");
                     }
-                  } else {
-                    $("#tips").html("<span style='color:blue'>出现错误！</span>");
+                  },
+                  error: function() {
+                    alert('请求出错');
+                  },
+                  complete: function() {
+                    $('#tips').hide();
                   }
-                },
-                error: function() {
-                  alert('请求出错');
-                },
-                complete: function() {
-                  $('#tips').hide();
                 }
-              }
-            );
-          }); 
+              );
+            }
+
+          });
           $('body').on('click','.page',function() {
             $(this).siblings().removeClass('active');
             $(this).addClass('active');
@@ -349,12 +356,6 @@ html
                   div.col-sm-3
                     p#warning7(style='color:#ff0000')
                 div.form-group
-                  label.col-sm-2.control-label 机构
-                  div.col-sm-7
-                    input.form-control#site_upd(type='text' disabled=true)
-                  div.col-sm-3
-                    p#warning8(style='color:#ff0000')
-                div.form-group
                   label.col-sm-2.control-label 类型
                   div.col-sm-7
                     select.form-control#type_upd(disabled=true)
@@ -364,6 +365,12 @@ html
                       option(value='INPUTTER') INPUTTER
                   div.col-sm-3
                     p#warning9(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构
+                  div.col-sm-7
+                    input.form-control#site_upd(type='text' disabled=true)
+                  div.col-sm-3
+                    p#warning8(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 状态
                   div.col-sm-7
@@ -412,21 +419,22 @@ html
                   div.col-sm-3
                     p#warning2(style='color:#ff0000')
                 div.form-group
-                  label.col-sm-2.control-label 机构
-                  div.col-sm-7
-                    select.form-control#site
-                  div.col-sm-3
-                    p#warning3(style='color:#ff0000')
-                div.form-group
                   label.col-sm-2.control-label 类型
                   div.col-sm-7
                     select.form-control#type
+                      option(value='' selected) 请选择角色类型
                       option(value='STUDY_ADMIN') STUDY_ADMIN
                       option(value='SITE_ADMIN') SITE_ADMIN
                       option(value='AUDITOR') AUDITOR
                       option(value='INPUTTER') INPUTTER
                   div.col-sm-3
                     p#warning4(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 机构
+                  div.col-sm-7
+                    select.form-control#site
+                  div.col-sm-3
+                    p#warning3(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 状态
                   div.col-sm-7
