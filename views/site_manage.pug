@@ -8,6 +8,10 @@ html
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script.
+      Handlebars.registerHelper('timestamps', function(timestamps){
+        return new Date(timestamps).toString();
+     });
     script#table-template(type="text/x-handlebars-template").
       {{#each sites}}
         <tr class="success">
@@ -16,8 +20,8 @@ html
           <td>{{type}}</td>
           <td>{{address}}</td>
           <td>{{code}}</td>
-          <td>{{created_at}}</td>
-          <td>{{updated_at}}</td>
+          <td>{{timestamps created_at}}</td>
+          <td>{{timestamps updated_at}}</td>
           <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"name":"{{name}}","type":"{{type}}","address":"{{address}}","code":"{{code}}"}'>修改</button></td>
           <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
         </tr>
