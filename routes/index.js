@@ -131,10 +131,14 @@ router.get('/user_manage', async function (ctx, next) {
       "updatedAt":origin_results.models[i].attributes.updated_at,
     }
   }
-  await ctx.render('user_manage', {
-    title: 'EVA管理平台-用户管理',
-    results: {results,page_num}
-  });
+  if (ctx.session.user) {
+    await ctx.render('user_manage', {
+      title: 'EVA管理平台-用户管理',
+      results: {results,page_num}
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
 });
 
 
@@ -300,10 +304,14 @@ router.get('/role_manage', async function (ctx, next) {
       "name": origin_studies.models[i].attributes.name
     }
   }
-  await ctx.render('role_manage', {
-    title: 'EVA管理平台-角色管理',
-    results: {results,users,studies,ids,page_num}
-  });
+  if (ctx.session.user) {
+    await ctx.render('role_manage', {
+      title: 'EVA管理平台-角色管理',
+      results: {results,users,studies,ids,page_num}
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
 });
 
 /**采用AJAX处理前端发回的请求
@@ -455,10 +463,14 @@ router.get('/study_manage', async function (ctx, next) {
       "updatedAt":origin_results.models[i].attributes.updated_at
     }
   }
-  await ctx.render('study_manage', {
-    title: 'EVA管理平台-项目管理',
-    results: {results,page_num}
-  });
+  if (ctx.session.user) {
+    await ctx.render('study_manage', {
+      title: 'EVA管理平台-项目管理',
+      results: {results,page_num}
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
 });
 
 /**采用AJAX处理前端发回的请求
@@ -582,10 +594,15 @@ router.get('/site_manage', async function (ctx, next) {
       "updatedAt":origin_results.models[i].attributes.updated_at,
     }
   }
-  await ctx.render('site_manage', {
-    title: 'EVA管理平台-机构管理',
-    results: {results,page_num}
-  });
+  if (ctx.session.user) {
+    await ctx.render('site_manage', {
+      title: 'EVA管理平台-机构管理',
+      results: {results,page_num}
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
+  
 });
 
 /**采用AJAX处理前端发回的请求
@@ -687,27 +704,39 @@ router.post('/site_manage',async function(ctx,next) {
  * 日志管理页
  */ 
 router.get('/log_manage', async function (ctx, next) {
-  await ctx.render('log_manage', {
-    title: 'EVA管理平台-日志管理'
-  });
+  if (ctx.session.user) {
+    await ctx.render('log_manage', {
+      title: 'EVA管理平台-日志管理'
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
 });
 
 /**-------------------------------------------------------------
  * 数据导入页
  */ 
 router.get('/import', async function (ctx, next) {
-  await ctx.render('import', {
-    title: 'EVA管理平台-数据导入'
-  });
+  if (ctx.session.user) {
+    await ctx.render('import', {
+      title: 'EVA管理平台-数据导入'
+    });
+  } else {
+    return ctx.redirect('/login');
+  }
 });
 
 /**-------------------------------------------------------------
  * 相关设置页
  */ 
 router.get('/settings', async function (ctx, next) {
-  await ctx.render('settings', {
+  if (ctx.session.user) {
+    await ctx.render('settings', {
     title: 'EVA管理平台-相关设置'
   });
+  } else {
+    return ctx.redirect('/login');
+  }
 });
 
 module.exports = router;
