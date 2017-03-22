@@ -134,6 +134,11 @@ html
           return;
         } else {
           $('#warning5').text('');
+        }
+        if ($.trim(due_date) == '') {
+          $('#warning6').text('截止日期为必填项！')
+        } else {
+          $('#warning6').text('');
           let newStudy = {
             "uid":uid,
             "name":name,
@@ -263,6 +268,11 @@ html
           return;
         } else {
           $('#warning12').text('');
+        }
+        if ($.trim(due_date) == '') {
+          $('#warning13').text('截止日期为必填项！')
+        } else {
+          $('#warning13').text('');
           let newStudy = {
             "id":id,
             "uid":uid,
