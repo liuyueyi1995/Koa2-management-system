@@ -169,6 +169,16 @@ router.post('/user_manage',async function(ctx,next) {
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
+    var total_num = await model.Users.query(function(qb) {
+      qb.where('email','like',content1)
+      .orWhere('name','like',content1)
+      .orWhere('phone','like',content1)
+      .orWhere('address','like',content1)
+      .orWhere('site','like',content1)
+      .orWhere('title','like',content1)
+      .orWhere('state','like',content1)
+    }).count();
+    var page_num = Math.ceil(total_num/10);
     var results = await model.Users.query('orderBy', 'id', 'asc').query(function(qb) {
       qb.where('email','like',content1)
       .orWhere('name','like',content1)
@@ -184,7 +194,7 @@ router.post('/user_manage',async function(ctx,next) {
     for(;len < results.length;len++){
       users[len] = results.models[len].attributes;
     }
-    ctx.body = {users,len};
+    ctx.body = {users,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
     var content = ctx.request.body.content;

@@ -206,7 +206,15 @@ html
               let tbody = $('tbody');
               tbody.html("");
               var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
-              $("tbody").html(tableTemplate(result))
+              $("tbody").html(tableTemplate(result));
+              let page = $('#pagination');
+              page.html("");
+              console.log(result.page_num)
+              $('<li class="page",page="first"><a>&laquo</a></li>').appendTo(page);
+              for (var i = 1;i < result.page_num+1;i++) {
+                $('<li class="page",page='+i+'><a>'+i+'</a></li>').appendTo(page)
+              }
+              $('<li class="page",page="last"><a>&raquo</a></li>').appendTo(page);
             }
           });
         } else {
@@ -369,7 +377,7 @@ html
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
       //分页组件
       div.row(style="text-align:center;")
-        ul.pagination(style="margin:0 auto;")
+        ul.pagination#pagination(style="margin:0 auto;")
           li.page(page="first")
             a &laquo;
           - for (var i = 1; i < results.page_num+1; i++)
