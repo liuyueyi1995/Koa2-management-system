@@ -26,7 +26,6 @@ html
     script.
       $(function (){
         $(document).ready(function(){
-          
           $('.btn-add').click(add); //搜索栏的添加按钮 触发ajax
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
           $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
@@ -63,7 +62,12 @@ html
               option.appendTo(select_study); //添加节点
             }
           });
-          $('body').on('change','#type',function(){//级联下拉菜单，当选中的项目改变时，触发ajax修改机构信息
+          $('#searchBox').bind('input propertychange',function() { //实时监听搜索框的内容，当内容变为空时，刷新页面
+            if ($.trim($('#searchBox').val()) == '') {
+              location.reload();
+            }
+          });
+          $('body').on('change','#type',function(){ //级联下拉菜单，当选中的项目改变时，触发ajax修改机构信息
             let type = $(this).val();
             let id = $('#study').val();
             if (type == 'STUDY_ADMIN') {
@@ -101,7 +105,8 @@ html
             }
 
           });
-          $('body').on('click','.page',function() {
+          $('body').on('click','.page',function() { 
+            //处理分页请求，获取要跳转到的页码以及此时搜索框的内容，如果有内容，则返回搜索结果对应页的内容，如果搜索框为空，则返回全部结果对应页的内容
             $(this).siblings().removeClass('active');
             $(this).addClass('active');
             let page = $(this).attr("page");
@@ -169,14 +174,12 @@ html
           let newRole = {
             "user":user,
             "study":study,
-            
             "type":type,
             "state":state
           };
           if (site) {
             newRole.site = site;
           }
-          console.log(newRole.site);
           $.ajax(
             {
               url:'/role_manage',
@@ -245,6 +248,13 @@ html
               tbody.html("");
               var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
               $("tbody").html(tableTemplate(result));
+              let page = $('#pagination');
+              page.html("");
+              $('<li class="page" page="first"><a>&laquo</a></li>').appendTo(page);
+              for (var i = 1;i < result.page_num+1;i++) {
+                $('<li class="page" page='+i+'><a>'+i+'</a></li>').appendTo(page);
+              }
+              $('<li class="page" page="last" page_max='+result.page_num+'><a>&raquo</a></li>').appendTo(page);
             }
           });
         } else {
@@ -327,7 +337,7 @@ html
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
       //分页组件
       div.row(style="text-align:center;")
-        ul.pagination(style="margin:0 auto;")
+        ul.pagination#pagination(style="margin:0 auto;")
           li.page(page="first")
             a &laquo;
           - for (var i = 1; i < results.page_num+1; i++)

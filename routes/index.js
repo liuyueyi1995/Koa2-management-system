@@ -115,8 +115,7 @@ router.get('/user_manage', async function (ctx, next) {
       page: 1,
       pageSize: 10
     });
-  var total_num = await model.Users.count();
-  var page_num = Math.ceil(total_num/10);
+  var page_num = origin_results.pagination['pageCount']; 
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -139,7 +138,7 @@ router.get('/user_manage', async function (ctx, next) {
 });
 
 
-/**采用AJAX处理对前端发回的请求
+/**采用AJAX处理前端发回的请求
  * 用户管理页
  * 根据action值的不同完成对应的操作：
  * 0 - 分页显示
@@ -169,16 +168,6 @@ router.post('/user_manage',async function(ctx,next) {
     var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
-    var total_num = await model.Users.query(function(qb) {
-      qb.where('email','like',content1)
-      .orWhere('name','like',content1)
-      .orWhere('phone','like',content1)
-      .orWhere('address','like',content1)
-      .orWhere('site','like',content1)
-      .orWhere('title','like',content1)
-      .orWhere('state','like',content1)
-    }).count();
-    var page_num = Math.ceil(total_num/10);
     var results = await model.Users.query('orderBy', 'id', 'asc').query(function(qb) {
       qb.where('email','like',content1)
       .orWhere('name','like',content1)
@@ -191,6 +180,7 @@ router.post('/user_manage',async function(ctx,next) {
       page: 1,
       pageSize: 10
     });
+    var page_num = results.pagination['pageCount']; 
     for(;len < results.length;len++){
       users[len] = results.models[len].attributes;
     }
@@ -278,13 +268,12 @@ router.get('/role_manage', async function (ctx, next) {
   var users = {};
   var ids = {};
   var studies = {};
-  var total_num = await model.Roles.count();
-  var page_num = Math.ceil(total_num/10);
   var origin_results = await model.Roles.forge().query('orderBy', 'id', 'asc').fetchPage({
       page: 1,
       pageSize: 10,
       withRelated:['user','study','site']
     });
+  var page_num = origin_results.pagination['pageCount']; 
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
       "id":origin_results.models[i].attributes.id,
@@ -317,7 +306,7 @@ router.get('/role_manage', async function (ctx, next) {
   });
 });
 
-/**采用AJAX处理对前端发回的请求
+/**采用AJAX处理前端发回的请求
  * 角色管理页
  * 根据action值的不同完成对应的操作：
  * 0 - 分页显示 
@@ -368,10 +357,11 @@ router.post('/role_manage',async function(ctx,next) {
       page: 1,
       pageSize: 10
     });
+    var page_num = results.pagination['pageCount'];
     for(;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
     }
-    ctx.body = {roles,len};
+    ctx.body = {roles,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
     var newRole = new model.Roles({
@@ -381,7 +371,6 @@ router.post('/role_manage',async function(ctx,next) {
       type: ctx.request.body.content['type'],
       state: ctx.request.body.content['state']
     });
-    console.log(ctx.request.body.content['site']);
     newRole.save();
     let ret = '添加成功！';
     ctx.body = {ret};
@@ -450,8 +439,7 @@ router.get('/study_manage', async function (ctx, next) {
       page: 1,
       pageSize: 10
     });
-  var total_num = await model.Studies.count();
-  var page_num = Math.ceil(total_num/10);
+  var page_num = origin_results.pagination['pageCount']; 
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -473,7 +461,7 @@ router.get('/study_manage', async function (ctx, next) {
   });
 });
 
-/**采用AJAX处理对前端发回的请求
+/**采用AJAX处理前端发回的请求
  * 项目管理页
  * 根据action值的不同完成对应的操作：
  * 0 - 分页显示
@@ -510,10 +498,11 @@ router.post('/study_manage',async function(ctx,next) {
       page: 1,
       pageSize: 10
     });
+    var page_num = results.pagination['pageCount']; 
     for(;len < results.length;len++){
       studies[len] = results.models[len].attributes;
     }
-    ctx.body = {studies,len};
+    ctx.body = {studies,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
     var newStudy = new model.Studies({
@@ -580,8 +569,7 @@ router.get('/site_manage', async function (ctx, next) {
       page: 1,
       pageSize: 10
     });
-  var total_num = await model.Sites.count();
-  var page_num = Math.ceil(total_num/10);
+  var page_num = origin_results.pagination['pageCount']; 
   var results = {};
   for(var i = 0;i < origin_results.length;i++){
     results[i] = {
@@ -600,7 +588,7 @@ router.get('/site_manage', async function (ctx, next) {
   });
 });
 
-/**采用AJAX处理对前端发回的请求
+/**采用AJAX处理前端发回的请求
  * 机构管理页
  * 根据action值的不同完成对应的操作：
  * 0 - 分页显示
@@ -638,10 +626,11 @@ router.post('/site_manage',async function(ctx,next) {
       page: 1,
       pageSize: 10
     });
+    var page_num = results.pagination['pageCount']; 
     for(;len < results.length;len++){
       sites[len] = results.models[len].attributes;
     }
-    ctx.body = {sites,len};
+    ctx.body = {sites,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
     var newSite = new model.Sites({
