@@ -126,6 +126,9 @@ html
         if ($.trim(contract_number) == '') {
           $('#warning4').text('病例数为必填项！');
           return;
+        } else if (!(/[0-9]/.test($.trim(contract_number)))) {
+          $('#warning4').text('病例数只能为数字！');
+          return;
         } else {
           $('#warning4').text('');
         }
@@ -259,6 +262,9 @@ html
         } 
         if ($.trim(contract_number) == '') {
           $('#warning11').text('病例数为必填项！');
+          return;
+        } else if (!(/[0-9]/.test($.trim(contract_number)))) {
+          $('#warning11').text('病例数只能为数字！');
           return;
         } else {
           $('#warning11').text('');
