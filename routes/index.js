@@ -127,6 +127,7 @@ router.get('/user_manage', async function (ctx, next) {
       "site":origin_results.models[i].attributes.site,
       "title":origin_results.models[i].attributes.title,
       "state":origin_results.models[i].attributes.state,
+      "type":origin_results.models[i].attributes.type,
       "createdAt":origin_results.models[i].attributes.created_at,
       "updatedAt":origin_results.models[i].attributes.updated_at,
     }
@@ -180,6 +181,7 @@ router.post('/user_manage',async function(ctx,next) {
       .orWhere('site','like',content1)
       .orWhere('title','like',content1)
       .orWhere('state','like',content1)
+      .orWhere('type','like',content1)
     }).fetchPage({
       page: 1,
       pageSize: 10
@@ -201,7 +203,8 @@ router.post('/user_manage',async function(ctx,next) {
       address: ctx.request.body.content['address'],
       site: ctx.request.body.content['site'],
       title: ctx.request.body.content['title'],
-      state: ctx.request.body.content['state']
+      state: ctx.request.body.content['state'],
+      type: ctx.request.body.content['type']
     });
     newUser.save();
     let ret = '添加成功！';
@@ -223,7 +226,8 @@ router.post('/user_manage',async function(ctx,next) {
       address: ctx.request.body.content['address'],
       site: ctx.request.body.content['site'],
       title: ctx.request.body.content['title'],
-      state: ctx.request.body.content['state']
+      state: ctx.request.body.content['state'],
+      type: ctx.request.body.content['type']
     }, {patch: true});
     let ret = '修改成功！';
     ctx.body = {ret};
@@ -241,6 +245,7 @@ router.post('/user_manage',async function(ctx,next) {
       .orWhere('site','like',content1)
       .orWhere('title','like',content1)
       .orWhere('state','like',content1)
+      .orWhere('type','like',content1)
     }).fetchPage({
       page: ctx.request.body.content.page,
       pageSize: 10

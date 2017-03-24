@@ -23,9 +23,10 @@ html
           <td>{{site}}</td>
           <td>{{title}}</td>
           <td>{{state}}</td>
+          <td>{{type}}</td>
           <td>{{timestamps created_at}}</td>
           <td>{{timestamps updated_at}}</td>
-          <td><button class="btn btn-info btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"email":"{{email}}","name":"{{name}}","phone":"{{phone}}","address":"{{address}}","site":"{{site}}","title":"{{title}}","state":"{{state}}"}'>修改基本信息</button></td>
+          <td><button class="btn btn-info btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"email":"{{email}}","name":"{{name}}","phone":"{{phone}}","address":"{{address}}","site":"{{site}}","title":"{{title}}","state":"{{state}}","type":"{{type}}"}'>修改基本信息</button></td>
           <td><button class="btn btn-primary btn-xs btn-block btn-upd-password" type="button" data-toggle="modal" data-target="#update_password" data-id={{id}}>修改密码</button></td>
           <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
         </tr>
@@ -109,6 +110,7 @@ html
         let site = $('#site').val();
         let title = $('#title').val();
         let state = $('#state').val();
+        let type = $('#type').val();
         if ($.trim(email) == '') {
           $('#warning1').text('邮箱为必填项！');
           return;
@@ -145,7 +147,8 @@ html
             "address":address,
             "site":site,
             "title":title,
-            "state":state
+            "state":state,
+            "type":type
           };
           $.ajax(
             {
@@ -238,6 +241,7 @@ html
         let site = $('#site_upd').val();
         let title = $('#title_upd').val();
         let state = $('#state_upd').val();
+        let type = $('#type_upd').val();
         if ($.trim(email) == '') {
           $('#warning4').text('邮箱为必填项！');
           return;
@@ -257,7 +261,8 @@ html
             "address":address,
             "site":site,
             "title":title,
-            "state":state
+            "state":state,
+            "type":type
           };
           $.ajax(
             {
@@ -364,6 +369,7 @@ html
               th 工作单位
               th 职务
               th 状态
+              th 类别
               th 创建日期
               th 修改日期
               th 修改基本信息
@@ -462,6 +468,12 @@ html
                       option(value='VERIFIED') VERIFIED
                       option(value='PENDING') PENDING
                       option(value='DENY') DENY
+                div.form-group
+                  label.col-sm-2.control-label 类别
+                  div.col-sm-7
+                    select.form-control#type_upd
+                      option(value='EXTERNAL' selected) EXTERNAL
+                      option(value='INTERNAL') INTERNAL
             div#id_upd(style="display:none") 存储待修改项的id
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
@@ -536,6 +548,12 @@ html
                       option(value='VERIFIED') VERIFIED
                       option(value='PENDING') PENDING
                       option(value='DENY') DENY
+                div.form-group
+                  label.col-sm-2.control-label 类别
+                  div.col-sm-7
+                    select.form-control#type
+                      option(value='EXTERNAL' selected) EXTERNAL
+                      option(value='INTERNAL') INTERNAL
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
               button.btn.btn-primary.btn-add(type='submit') 确认添加
