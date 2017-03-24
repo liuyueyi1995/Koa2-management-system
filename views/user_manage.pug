@@ -33,7 +33,7 @@ html
       {{/each}}
     script.
       $(function (){
-        $(document).ready(function(){
+        $(document).ready(function(){ 
           $('.btn-add').click(add); //模态框里的添加按钮 触发ajax
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
           $('.btn-search').click(search); //搜索栏的搜索按钮 触发ajax
@@ -80,7 +80,7 @@ html
               action = 5;
             }
             let content = {
-              page: page,
+              page: fetch_num,
               search_content: search_content
             }
             $.ajax(
@@ -218,7 +218,7 @@ html
               let tbody = $('tbody');
               tbody.html("");
               var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
-              $("tbody").html(tableTemplate(result));
+              $("tbody").html(tableTemplate(result)); 
               let page = $('#pagination');
               page.html("");
               $('<li class="page" page="first"><a>&laquo</a></li>').appendTo(page);
