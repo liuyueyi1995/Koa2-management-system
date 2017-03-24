@@ -387,8 +387,34 @@ router.post('/role_manage',async function(ctx,next) {
       deadline: ctx.request.body.content['deadline']
     });
     newRole.save();
-    let ret = '添加成功！';
-    ctx.body = {ret};
+    var user_id = ctx.request.body.content['user'];
+    var users = await model.Users.where('id','=',user_id).fetch();
+    var type = users.attributes.type;
+    if (type == 'EXTERNAL') {
+      let ret = '添加成功！';
+      ctx.body = {ret};
+    } else if (type == 'INTERNAL') {
+      var chars = "ABCDEFGHJKLMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
+      var space = chars.length;
+      var pwd = "";
+      for (var i = 0; i < 8; i++) {
+        pwd += chars.charAt(Math.floor(Math.random()*space));
+      }
+      var password = bcrypt.hashSync(pwd,9);
+      new model.Users({id: ctx.request.body.content['id']})
+      .save({
+        password: password
+      }, {patch: true});
+      
+      let ret = `添加成功！
+      
+      你的临时登录口令为: `+pwd+`
+      
+      请记住这个序列！`;
+      
+      ctx.body = {ret};
+    }
+    
 
   } else if (ctx.request.body.action == 3) {
     var id = ctx.request.body.content;
