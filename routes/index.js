@@ -389,11 +389,11 @@ router.post('/role_manage',async function(ctx,next) {
     newRole.save();
     var user_id = ctx.request.body.content['user'];
     var users = await model.Users.where('id','=',user_id).fetch();
-    var type = users.attributes.type;
-    if (type == 'EXTERNAL') {
+    var type = users.attributes.type; //根据用户类型，采用不同的处理方式
+    if (type == 'EXTERNAL') { //外部用户直接返回添加成功
       let ret = '添加成功！';
       ctx.body = {ret};
-    } else if (type == 'INTERNAL') {
+    } else if (type == 'INTERNAL') { //内部用户，生成8位字符序列作为登陆口令
       var chars = "ABCDEFGHJKLMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
       var space = chars.length;
       var pwd = "";
@@ -401,11 +401,11 @@ router.post('/role_manage',async function(ctx,next) {
         pwd += chars.charAt(Math.floor(Math.random()*space));
       }
       var password = bcrypt.hashSync(pwd,9);
-      new model.Users({id: ctx.request.body.content['id']})
+      new model.Users({id: user_id})
       .save({
         password: password
-      }, {patch: true});
-      
+      }, {patch: true}); //修改内部用户的密码
+
       let ret = `添加成功！
       
       你的临时登录口令为: `+pwd+`
