@@ -3,7 +3,11 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 var ds = require('../datasource');
 var model = require('../models');
+var CronJob = require('cron').CronJob;
 
+var job = new CronJob('* */10 * * * *',function() {
+  console.log(1)
+}, null, true, 'Asia/Chongqing')
 /**------------------------------------------------------------- */
 // 主页
 router.get('/', async function (ctx, next) {
@@ -291,7 +295,7 @@ router.get('/role_manage', async function (ctx, next) {
       "site_name":origin_results.models[i].relations.site.attributes.name,
       "type":origin_results.models[i].attributes.type,
       "state":origin_results.models[i].attributes.state,
-      "deadline":origin_results.models[i].attributes.deadline,
+      "expiring_date":origin_results.models[i].attributes.expiring_date,
       "createdAt":origin_results.models[i].attributes.created_at,
       "updatedAt":origin_results.models[i].attributes.updated_at
     }
@@ -338,7 +342,7 @@ router.post('/role_manage',async function(ctx,next) {
     var content = ctx.request.body.content.page;
     var results = await model.Roles.query(function(qb) {
       qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
-      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.deadline','roles.created_at','roles.updated_at')
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.expiring_date','roles.created_at','roles.updated_at')
       .leftJoin('users','roles.user_id','users.id')
       .leftJoin('studies','roles.study_id','studies.id')
       .leftJoin('sites','roles.site_id','sites.id')
@@ -358,7 +362,7 @@ router.post('/role_manage',async function(ctx,next) {
     var content1 = '%'+content+'%'; 
     var results = await model.Roles.query(function(qb) {
       qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
-      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.deadline','roles.created_at','roles.updated_at')
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.expiring_date','roles.created_at','roles.updated_at')
       .leftJoin('users','roles.user_id','users.id')
       .leftJoin('studies','roles.study_id','studies.id')
       .leftJoin('sites','roles.site_id','sites.id')
@@ -384,7 +388,7 @@ router.post('/role_manage',async function(ctx,next) {
       site_id: ctx.request.body.content['site'],
       type: ctx.request.body.content['type'],
       state: ctx.request.body.content['state'],
-      deadline: ctx.request.body.content['deadline']
+      expiring_date: ctx.request.body.content['expiring_date']
     });
     newRole.save();
     var user_id = ctx.request.body.content['user'];
@@ -411,7 +415,6 @@ router.post('/role_manage',async function(ctx,next) {
       你的临时登录口令为: `+pwd+`
       
       请记住这个序列！`;
-      
       ctx.body = {ret};
     }
     
@@ -428,7 +431,7 @@ router.post('/role_manage',async function(ctx,next) {
     new model.Roles({id: ctx.request.body.content['id']})
     .save({
       state: ctx.request.body.content['state'],
-      deadline: ctx.request.body.content['deadline']
+      expiring_date: ctx.request.body.content['expiring_date']
     }, {patch: true});
     let ret = '状态修改成功！';
     ctx.body = {ret};
@@ -440,7 +443,7 @@ router.post('/role_manage',async function(ctx,next) {
     var content1 = '%'+content+'%'; 
     var results = await model.Roles.query(function(qb) {
       qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
-      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.deadline','roles.created_at','roles.updated_at')
+      .select('roles.id','users.name as user_name','studies.name as study_name','sites.name as site_name','roles.type','roles.state','roles.expiring_date','roles.created_at','roles.updated_at')
       .leftJoin('users','roles.user_id','users.id')
       .leftJoin('studies','roles.study_id','studies.id')
       .leftJoin('sites','roles.site_id','sites.id')

@@ -24,14 +24,14 @@ html
           <td>{{site_name}}</td>
           <td>{{type}}</td>
           <td>{{state}}</td>
-          {{#if deadline}}
-          <td>{{timestamps deadline}}</td>
+          {{#if expiring_date}}
+          <td>{{timestamps expiring_date}}</td>
           {{^}}
           <td></td>
           {{/if}}
           <td>{{timestamps created_at}}</td>
           <td>{{timestamps updated_at}}</td>
-          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"user_name":"{{user_name}}","study_name":"{{study_name}}","site_name":"{{site_name}}","type":"{{type}}","state":"{{state}}","deadline":"{{deadline}}"}'>修改</button></td>
+          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"user_name":"{{user_name}}","study_name":"{{study_name}}","site_name":"{{site_name}}","type":"{{type}}","state":"{{state}}","expiring_date":"{{expiring_date}}"}'>修改</button></td>
           <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
         </tr>
       {{/each}}
@@ -51,7 +51,7 @@ html
             $('#study_upd').val(info_obj.study_name);
             $('#type_upd').val(info_obj.type);
             $('#state_upd').val(info_obj.state);
-            $('#deadline_upd').val(info_obj.deadline);
+            $('#expiring_date_upd').val(info_obj.expiring_date);
           });
           $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的角色信息?');
@@ -161,7 +161,7 @@ html
         let site = $('#site').val();
         let type = $('#type').val();
         let state = $('#state').val();
-        let deadline = $('#deadline').val();
+        let expiring_date = $('#expiring_date').val();
         if ($.trim(user) == '') {
           $('#warning1').text('用户为必填项！');
           return;
@@ -190,7 +190,7 @@ html
             "study":study,
             "type":type,
             "state":state,
-            "deadline":deadline
+            "expiring_date":expiring_date
           };
           if (site) {
             newRole.site = site;
@@ -279,11 +279,11 @@ html
       function update() {
         let id = $('#id_upd').val();
         let state = $('#state_upd').val();
-        let deadline = $('#deadline_upd').val();
+        let expiring_date = $('#expiring_date_upd').val();
         let newRole = {
           "id":id,
           "state":state,
-          "deadline":deadline
+          "expiring_date":expiring_date
         };
         console.log(newRole)
         $.ajax(
@@ -412,7 +412,7 @@ html
                   label.col-sm-2.control-label 截止日期
                   div.col-sm-7
                     div.input-group.date#datetimepicker1
-                      input.form-control#deadline_upd(type='text')
+                      input.form-control#expiring_date_upd(type='text')
                       span.input-group-addon
                         span.glyphicon.glyphicon-calendar
                   script.
@@ -489,7 +489,7 @@ html
                   label.col-sm-2.control-label 截止日期
                   div.col-sm-7
                     div.input-group.date#datetimepicker
-                      input.form-control#deadline(type='text')
+                      input.form-control#expiring_date(type='text')
                       span.input-group-addon
                         span.glyphicon.glyphicon-calendar
                   script.

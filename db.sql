@@ -62,7 +62,7 @@ CREATE TABLE roles (
 	site_id INTEGER REFERENCES sites(id) ON DELETE CASCADE,     
 	type TEXT NOT NULL, --STUDY_ADMIN/SITE_ADMIN/INPUTTER/AUDITOR     
 	state TEXT NOT NULL, --ENABLE/DISABLED    
-	deadline TIMESTAMP, 
+	expiring_date TIMESTAMP, 
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     
 	UNIQUE(user_id, study_id, site_id, type) 
