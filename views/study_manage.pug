@@ -24,7 +24,11 @@ html
           <td>{{state}}</td>
           <td>{{contract_number}}</td>
           <td>{{type}}</td>
+          {{#if deadline}}
           <td>{{timestamps due_date}}</td>
+          {{^}}
+          <td></td>
+          {{/if}}
           <td>{{need_audit}}</td>
           <td>{{timestamps created_at}}</td>
           <td>{{timestamps updated_at}}</td>
