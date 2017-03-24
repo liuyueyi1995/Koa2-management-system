@@ -34,6 +34,11 @@ html
     script.
       $(function (){
         $(document).ready(function(){ 
+          $('tbody tr').each(function() {     
+            if($.trim($(this).children("td:eq(8)").text()) == 'INTERNAL') {               
+              $(this).removeClass('success').addClass('danger');             
+            }        
+          }); 
           $('.btn-add').click(add); //模态框里的添加按钮 触发ajax
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
           $('.btn-search').click(search); //搜索栏的搜索按钮 触发ajax
@@ -50,6 +55,7 @@ html
             $('#site_upd').val(info_obj.site);
             $('#title_upd').val(info_obj.title);
             $('#state_upd').val(info_obj.state);
+            $('#type_upd').val(info_obj.type);
           });
           $('body').on('click','.btn-upd-password',function() { //表格里的修改基本密码按钮 将该行对应的id传递给模态框
             $('#upd_pass_id').html($(this).attr("data-id"));
@@ -93,6 +99,11 @@ html
                   tbody.html("");
                   var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
                   $("tbody").html(tableTemplate(result));
+                  $('tbody tr').each(function() {   
+                    if($.trim($(this).children("td:eq(8)").text()) == 'INTERNAL') {               
+                      $(this).removeClass('success').addClass('danger');             
+                    }        
+                  }); 
                 }
               }
             );
@@ -219,6 +230,11 @@ html
               tbody.html("");
               var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
               $("tbody").html(tableTemplate(result)); 
+              $('tbody tr').each(function() {   
+                if($.trim($(this).children("td:eq(8)").text()) == 'INTERNAL') {               
+                  $(this).removeClass('success').addClass('danger');             
+                }        
+              }); 
               let page = $('#pagination');
               page.html("");
               $('<li class="page" page="first"><a>&laquo</a></li>').appendTo(page);
