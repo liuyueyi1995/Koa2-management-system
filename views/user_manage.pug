@@ -128,18 +128,6 @@ html
         } else {
           $('#warning1').text('');
         }
-        if ($.trim(password) == '') {
-          $('#warning2').text('密码为必填项！');
-          return;
-        } else {
-          $('#warning2').text('');
-        } 
-        if ($.trim(password_confirm) == '') {
-          $('#warning3').text('请再次输入密码！');
-          return;
-        } else {
-          $('#warning3').text('');
-        } 
         if ($.trim(name) == '') {
           $('#warning4').text('姓名为必填项！');
           return;
@@ -452,7 +440,7 @@ html
                 div.form-group
                   label.col-sm-2.control-label 邮箱
                   div.col-sm-7
-                    input.form-control#email_upd(type='text',placeholder='请输入邮箱(必填)',value='',required)
+                    input.form-control#email_upd(type='text',placeholder='请输入用户名/邮箱(必填)',value='',required)
                   div.col-sm-3
                     p#warning5(style='color:#ff0000')
                 div.form-group
@@ -520,19 +508,19 @@ html
                 div.form-group
                   label.col-sm-2.control-label 邮箱
                   div.col-sm-7
-                    input.form-control#email(type='text',placeholder='请输入邮箱(必填)',value='',required)
+                    input.form-control#email(type='text',placeholder='请输入用户名/邮箱(必填)',value='',required)
                   div.col-sm-3
                     p#warning1(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 密码
                   div.col-sm-7
-                    input.form-control#password(type='password',placeholder='请输入密码(必填)',value='',required)
+                    input.form-control#password(type='password',placeholder='请输入密码',value='',required)
                   div.col-sm-3
                     p#warning2(style='color:#ff0000')
                 div.form-group
                   label.col-sm-2.control-label 确认密码
                   div.col-sm-7
-                    input.form-control#password_confirm(type='password',placeholder='请再次输入密码(必填)',value='',required)
+                    input.form-control#password_confirm(type='password',placeholder='请再次输入密码',value='',required)
                   div.col-sm-3
                     p#warning3(style='color:#ff0000')
                 div.form-group
