@@ -5,9 +5,12 @@ html
     title= title
     link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet' href='/stylesheets/mycss.css')
+    link(rel='stylesheet' href='//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/build/css/bootstrap-datetimepicker.css')
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js')
+    script(src='//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/src/js/bootstrap-datetimepicker.js') 
     script.
       Handlebars.registerHelper('timestamps', function(timestamps){
         return new Date(timestamps).toString();
@@ -21,9 +24,14 @@ html
           <td>{{site_name}}</td>
           <td>{{type}}</td>
           <td>{{state}}</td>
+          {{#if deadline}}
+          <td>{{timestamps deadline}}</td>
+          {{^}}
+          <td></td>
+          {{/if}}
           <td>{{timestamps created_at}}</td>
           <td>{{timestamps updated_at}}</td>
-          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"user_name":"{{user_name}}","study_name":"{{study_name}}","site_name":"{{site_name}}","type":"{{type}}","state":"{{state}}"}'>修改</button></td>
+          <td><button class="btn btn-primary btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"user_name":"{{user_name}}","study_name":"{{study_name}}","site_name":"{{site_name}}","type":"{{type}}","state":"{{state}}","deadline":"{{deadline}}"}'>修改</button></td>
           <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>
         </tr>
       {{/each}}
@@ -43,6 +51,7 @@ html
             $('#study_upd').val(info_obj.study_name);
             $('#type_upd').val(info_obj.type);
             $('#state_upd').val(info_obj.state);
+            $('#deadline_upd').val(info_obj.deadline);
           });
           $('body').on('click','.btn-del',function() { //表格里的删除按钮 将该行对应的id传递给模态框
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的角色信息?');
@@ -152,6 +161,7 @@ html
         let site = $('#site').val();
         let type = $('#type').val();
         let state = $('#state').val();
+        let deadline = $('#deadline').val();
         if ($.trim(user) == '') {
           $('#warning1').text('用户为必填项！');
           return;
@@ -179,7 +189,8 @@ html
             "user":user,
             "study":study,
             "type":type,
-            "state":state
+            "state":state,
+            "deadline":deadline
           };
           if (site) {
             newRole.site = site;
@@ -268,10 +279,13 @@ html
       function update() {
         let id = $('#id_upd').val();
         let state = $('#state_upd').val();
+        let deadline = $('#deadline_upd').val();
         let newRole = {
           "id":id,
-          "state":state
+          "state":state,
+          "deadline":deadline
         };
+        console.log(newRole)
         $.ajax(
           {
             url:'/role_manage',
@@ -324,6 +338,7 @@ html
               th 机构名称
               th 类型
               th 状态
+              th 过期时间
               th 创建日期
               th 修改日期
               th 修改
@@ -393,6 +408,19 @@ html
                       option(value='DISABLE') DISABLE
                   div.col-sm-3
                     p#warning10(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 截止日期
+                  div.col-sm-7
+                    div.input-group.date#datetimepicker1
+                      input.form-control#deadline_upd(type='text')
+                      span.input-group-addon
+                        span.glyphicon.glyphicon-calendar
+                  script.
+                    $(function() {
+                      $('#datetimepicker1').datetimepicker();
+                    });
+                  div.col-sm-3
+                    p#warning12(style='color:#ff0000')
             div#id_upd(style="display:none") 存储待修改项的id
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
@@ -457,6 +485,19 @@ html
                       option(value='DISABLE') DISABLE
                   div.col-sm-3
                     p#warning5(style='color:#ff0000')
+                div.form-group
+                  label.col-sm-2.control-label 截止日期
+                  div.col-sm-7
+                    div.input-group.date#datetimepicker
+                      input.form-control#deadline(type='text')
+                      span.input-group-addon
+                        span.glyphicon.glyphicon-calendar
+                  script.
+                    $(function() {
+                      $('#datetimepicker').datetimepicker();
+                    });
+                  div.col-sm-3
+                    p#warning11(style='color:#ff0000')
             div.modal-footer
               button.btn.btn-default(type='button' data-dismiss='modal') 取消
               button.btn.btn-primary.btn-add(type='submit') 确认添加
