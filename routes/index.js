@@ -6,7 +6,7 @@ var model = require('../models');
 var CronJob = require('cron').CronJob;
 
 /**------------------------------------------------------------- 
- * 定时任务，每隔一段时间将数据库中角色过期时间小于当前时间的角色信息删除
+ * 定时任务，每隔一段时间将数据库中角色过期时间小于当前时间的内部用户的角色信息删除
 */
 var job = new CronJob('* */10 * * * *', async function() {
   var current_time = new Date().toLocaleString();
@@ -14,7 +14,7 @@ var job = new CronJob('* */10 * * * *', async function() {
     qb
     .select('roles.id')
     .leftJoin('users','roles.user_id','users.id')
-    //.where('users.type','=','INTERNAL')
+    .where('users.type','=','INTERNAL')
     .andWhere('roles.expiring_date','<',current_time)
   }).destroy();
 }, null, true, 'Asia/Chongqing')
