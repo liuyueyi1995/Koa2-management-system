@@ -10,6 +10,7 @@
 使用 `Bookshelf` + `Knex` 作为 `ORM` 和 `Query Builder`  
 使用 `Sentry` 作为错误信息的收集反馈平台   
 采用 `AJAX` 处理前端请求     
+使用 `cron` 库完成定时任务的执行 
 
 目录结构和babel的配置参考了 https://github.com/17koa/koa-demo   
 原链接似乎已经被删掉了，这个是我fork过来的版本 https://github.com/liuyueyi1995/koa2-demo    
@@ -87,4 +88,6 @@
 - 未登录的情况下，通过修改URL会跳过登录，直接操作数据库。  
   + 已解决。  
     * 在每个`get`请求返回之前，加入`session`的判断，session为空则跳转到`login`页。
-  
+- 针对内部用户的删除需要join，pgsql的delete只支持using，bookshelf不支持using。 
+  + 已解决。  
+    * 改用knex直接完成查询。  

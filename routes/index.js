@@ -7,16 +7,13 @@ var CronJob = require('cron').CronJob;
 
 /**------------------------------------------------------------- 
  * 定时任务，每隔一段时间将数据库中角色过期时间小于当前时间的内部用户的角色信息删除
-*/
-var job = new CronJob('* */10 * * * *', async function() {
+ */
+var job = new CronJob('*/5 * * * * *', async function() {
   var current_time = new Date().toLocaleString();
-  var result = await model.Roles.forge().query(function(qb) {
-    qb
-    .select('roles.id')
-    .leftJoin('users','roles.user_id','users.id')
-    .where('users.type','=','INTERNAL')
-    .andWhere('roles.expiring_date','<',current_time)
-  }).destroy();
+  await ds.knex.raw(
+    "delete from roles using users where roles.user_id=users.id and users.type='INTERNAL' and roles.expiring_date < ?;",
+    current_time
+  );
 }, null, true, 'Asia/Chongqing')
 /**------------------------------------------------------------- */
 // 主页
