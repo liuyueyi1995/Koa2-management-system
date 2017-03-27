@@ -57,7 +57,7 @@ html
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的角色信息?');
             $('#del_id').html($(this).attr("data-id"));
           });
-          $('body').on('click','.btn-ad',function() { //搜索框旁边的添加按钮 将所有已存在的用户信息传递给模态框
+          $('body').on('click','#btn-ad',function() { //搜索框旁边的添加按钮 将所有已存在的用户信息传递给模态框
             let origin_user = $(this).attr("data-user");
             let user_obj = eval('('+origin_user+')'); //string to json
             let select_user = $('#user');
@@ -323,7 +323,7 @@ html
             div.input-group
               span.input-group-btn
                 - var users = results.users,studies = results.studies
-                button.btn.btn-warning.btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加角色信息
+                button.btn.btn-warning#btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加角色信息
               input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
@@ -417,7 +417,9 @@ html
                         span.glyphicon.glyphicon-calendar
                   script.
                     $(function() {
-                      $('#datetimepicker1').datetimepicker();
+                      $('#datetimepicker1').datetimepicker({
+                        format:"YYYY/MM/DD HH:MM"
+                      });
                     });
                   div.col-sm-3
                     p#warning12(style='color:#ff0000')
@@ -494,7 +496,9 @@ html
                         span.glyphicon.glyphicon-calendar
                   script.
                     $(function() {
-                      $('#datetimepicker').datetimepicker();
+                      $('#datetimepicker').datetimepicker({
+                        format:"YYYY/MM/DD HH:MM"
+                      });
                     });
                   div.col-sm-3
                     p#warning11(style='color:#ff0000')
