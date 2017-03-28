@@ -8,8 +8,29 @@ var CronJob = require('cron').CronJob;
 /**------------------------------------------------------------- 
  * 定时任务，每隔一段时间将数据库中角色过期时间小于当前时间的内部用户的角色信息删除
  */
+Date.prototype.format =function(format) {
+  var o = {
+  "M+" : this.getMonth()+1, //month
+  "d+" : this.getDate(), //day
+  "h+" : this.getHours(), //hour
+  "m+" : this.getMinutes(), //minute
+  "s+" : this.getSeconds(), //second
+  "q+" : Math.floor((this.getMonth()+3)/3), //quarter
+  "S" : this.getMilliseconds() //millisecond
+  }
+  if(/(y+)/.test(format)) {
+    format=format.replace(RegExp.$1,(this.getFullYear()+"").substr(4- RegExp.$1.length));
+  }
+  for(var k in o){
+    if(new RegExp("("+ k +")").test(format)) {
+      format = format.replace(RegExp.$1,RegExp.$1.length==1? o[k] :("00"+ o[k]).substr((""+ o[k]).length));
+    }
+  }
+  return format;
+}
 var job = new CronJob('00 */5 * * * *', async function() {
-  var current_time = new Date().toLocaleString();
+  //var current_time = new Date().toLocaleString();
+  var current_time = new Date().format("yyyy-MM-dd hh:mm:ss");
   await ds.knex.raw(
     "delete from roles using users where roles.user_id=users.id and users.type='INTERNAL' and roles.expiring_date < ?;",
     current_time
@@ -41,7 +62,8 @@ router.get('/default', async function (ctx, next) {
     user: ctx.session.user
   });
 });
-/*
+/** 因为管理员账号只需要1个，没有注册的必要了。
+ *  今后如果有需求再将其打开
 // 注册页
 router.get('/reg', async function (ctx, next) {
   await ctx.render('reg', {
@@ -98,7 +120,8 @@ router.get('/login', async function (ctx, next) {
 
 // 提交登录信息
 router.post('/login', async function (ctx, next) {
-  /*
+  /** 因为管理员账号只需要1个，没有数据库存取的必要了。
+   *  今后如果有需求再将其打开
   //需要判断的逻辑：用户名不存在或者密码错误
   var count = await model.Managers.where('username', ctx.request.body['username']).count('username');
   if(count == 0) {
@@ -129,7 +152,7 @@ router.post('/login', async function (ctx, next) {
   } else {
     var hmac = crypto.createHmac('sha256', 'liuyueyi');
     var password = hmac.update(ctx.request.body['password']).digest('hex');
-    if (password != '1d4936e73bd8273cf26e711646ca079b265e5852d3078d4465f0ac3436eefe4b') {
+    if (password != '1d4936e73bd8273cf26e711646ca079b265e5852d3078d4465f0ac3436eefe4b') { //密码是pass
       await ctx.render('login', {
         title: 'EVA管理平台-登录',
         error: '密码错误'

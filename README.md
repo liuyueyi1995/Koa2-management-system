@@ -106,3 +106,8 @@ module.exports = config;
 - 针对内部用户的删除需要join，pgsql的delete只支持`using`，bookshelf不支持`using`。 
   + 已解决。  
     * 改用`knex`直接完成查询。  
+- date/time field value out of range   
+  + 已解决。  
+    * 在本地的测试数据库和阿里云的数据库虽然都是pgsql9.4，但是审查机制不同，  
+    * 阿里云的日期判别似乎不能出现上下午(AM/PM)  
+    * 所以给`Date`类增加了`format`方法，用于格式化日期。
