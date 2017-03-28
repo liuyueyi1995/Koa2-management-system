@@ -53,6 +53,20 @@
 - 提高代码复用的程度；  
 
 ---
+## focus
+repo中已经将包含敏感信息的`config.js`文件删除掉，使用时需要额外添加：
+```
+var config = {
+    database: '',
+    username: '',
+    password: '',
+    host: '',
+    port: 
+};
+
+module.exports = config;
+```
+---
 ## ISSUEs  
 
 - 级联菜单，有bug，初始时，在没有改变`type`的情况下，`site`的列表出不来。 
