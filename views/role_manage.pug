@@ -421,8 +421,12 @@ html
                         span.glyphicon.glyphicon-calendar
                   script.
                     $(function() {
+                      var cur = new Date();
                       $('#datetimepicker1').datetimepicker({
                         format:"YYYY-MM-DD HH:mm"
+                      })
+                      $('#datetimepicker1').on("dp.change",function(e) {
+                        $(this).data("DateTimePicker").minDate(cur);
                       });
                     });
                   div.col-sm-3
@@ -500,8 +504,12 @@ html
                         span.glyphicon.glyphicon-calendar
                   script.
                     $(function() {
+                      var cur = new Date();
                       $('#datetimepicker').datetimepicker({
                         format:"YYYY-MM-DD HH:mm"
+                      });
+                      $('#datetimepicker').on("dp.change",function(e) {
+                        $(this).data("DateTimePicker").minDate(cur);
                       });
                     });
                   div.col-sm-3
