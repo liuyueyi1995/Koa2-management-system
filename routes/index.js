@@ -41,7 +41,7 @@ router.get('/default', async function (ctx, next) {
     user: ctx.session.user
   });
 });
-
+/*
 // 注册页
 router.get('/reg', async function (ctx, next) {
   await ctx.render('reg', {
@@ -88,7 +88,7 @@ router.post('/reg', async function (ctx, next) {
     }
   }
 });
-
+*/
 // 登录页
 router.get('/login', async function (ctx, next) {
   await ctx.render('login', {
@@ -98,6 +98,7 @@ router.get('/login', async function (ctx, next) {
 
 // 提交登录信息
 router.post('/login', async function (ctx, next) {
+  /*
   //需要判断的逻辑：用户名不存在或者密码错误
   var count = await model.Managers.where('username', ctx.request.body['username']).count('username');
   if(count == 0) {
@@ -117,6 +118,25 @@ router.post('/login', async function (ctx, next) {
         title: 'EVA管理平台-登录',
         error: '密码错误'
       });
+    }
+  }
+  */
+  if (ctx.request.body['username'] != 'admin') {
+    await ctx.render('login', {
+      title: 'EVA管理平台-登录',
+      error: '用户名不存在'
+    });
+  } else {
+    var hmac = crypto.createHmac('sha256', 'liuyueyi');
+    var password = hmac.update(ctx.request.body['password']).digest('hex');
+    if (password != '1d4936e73bd8273cf26e711646ca079b265e5852d3078d4465f0ac3436eefe4b') {
+      await ctx.render('login', {
+        title: 'EVA管理平台-登录',
+        error: '密码错误'
+      });
+    } else {
+      ctx.session.user = 'admin';
+      return ctx.response.redirect('/'); 
     }
   }
 });
