@@ -11,7 +11,7 @@ html
     script.
       Handlebars.registerHelper('timestamps', function(timestamps){
         return new Date(timestamps).toString();
-     });
+     }); //对时间戳的处理函数
     script#table-template(type="text/x-handlebars-template").
       {{#each sites}}
         <tr class="success">
@@ -35,7 +35,7 @@ html
           $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
           $('body').on('click','.btn-upd',function() { //表格里的修改基本信息按钮 将该行的信息写入模态框
             let origin_info = $(this).attr("data-result");
-            let info_obj = eval('('+origin_info+')'); //string to json
+            let info_obj = eval('('+origin_info+')'); //字符串转换成json对象
             $('#id_upd').val(info_obj.id);
             $('#name_upd').val(info_obj.name);
             $('#type_upd').val(info_obj.type);
@@ -51,20 +51,20 @@ html
               location.reload();
             }
           });
-          $('body').on('click','.page',function() {
-            $(this).siblings().removeClass('active');
+          $('body').on('click','.page',function() { //分页按钮 根据搜索框是否有内容，来决定触发AJAX的action值
+            $(this).siblings().removeClass('active'); //被点击的按钮变为active
             $(this).addClass('active');
             let page = $(this).attr("page");
             let search_content = $('#searchBox').val();
             let action = 0;
-            if (page == 'first') {
+            if (page == 'first') { //获取页码
               fetch_num = 1
             } else if (page == 'last') {
               fetch_num = $(this).attr("page_max")
             } else {
               fetch_num = $(this).attr("page")
             }
-            if (search_content) {
+            if (search_content) { //判断搜索框内容
               action = 5;
             }
             let content = {
@@ -149,6 +149,7 @@ html
           return false;
         }
       }
+
       function del() {
         let id = $(this).parent().prev().html();
         $.ajax(
@@ -176,6 +177,7 @@ html
           }
         );
       }
+
       function search() {
         let content = $('#searchBox').val();
         if (content) {
@@ -204,6 +206,7 @@ html
           alert('There is no condition!');
         }
       } 
+
       function update() {
         let id = $('#id_upd').val();
         let name = $('#name_upd').val();
@@ -271,6 +274,7 @@ html
 
   body
     div.container
+      //标题和搜索框
       div.row
         ul.list-inline
           li.col-lg-3.nonpadding
@@ -283,7 +287,7 @@ html
               input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
-            
+      //表格      
       div.row
         table.table
           thead
@@ -308,7 +312,7 @@ html
               td.success 
                 - var id = result.id
                 button(type='button' class='btn btn-danger btn-xs btn-block btn-del' data-id=id data-toggle="modal",data-target="#delete") 删除
-      //分页组件
+      //分页
       div.row(style="text-align:center;")
         ul.pagination#pagination(style="margin:0 auto;")
           li.page(page="first")

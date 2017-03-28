@@ -8,15 +8,18 @@ var CronJob = require('cron').CronJob;
 /**------------------------------------------------------------- 
  * 定时任务，每隔一段时间将数据库中角色过期时间小于当前时间的内部用户的角色信息删除
  */
-var job = new CronJob('*/5 * * * * *', async function() {
+var job = new CronJob('00 */5 * * * *', async function() {
   var current_time = new Date().toLocaleString();
   await ds.knex.raw(
     "delete from roles using users where roles.user_id=users.id and users.type='INTERNAL' and roles.expiring_date < ?;",
     current_time
   );
-}, null, true, 'Asia/Chongqing')
-/**------------------------------------------------------------- */
-// 主页
+}, null, true, 'Asia/Chongqing');
+
+/**-------------------------------------------------------------
+ * 主页
+ * 根据session是否为空，决定显示登陆页还是欢迎页
+ */
 router.get('/', async function (ctx, next) {
   if (ctx.session.user) {
     await ctx.render('index', {
@@ -26,21 +29,26 @@ router.get('/', async function (ctx, next) {
   } else {
     return ctx.redirect('/login');
   }
-  
 });
-// 默认的欢迎页
+
+/**-------------------------------------------------------------
+ * 欢迎页
+ * 将session中的用户名传递给欢迎页
+ */
 router.get('/default', async function (ctx, next) {
   await ctx.render('default', {
     title: 'EVA管理平台',
     user: ctx.session.user
   });
 });
+
 // 注册页
 router.get('/reg', async function (ctx, next) {
   await ctx.render('reg', {
     title: 'EVA管理平台-注册'
   });
 });
+
 // 提交注册信息
 router.post('/reg', async function (ctx, next) {
   if(ctx.request.body['username'].length > 25) {
@@ -80,12 +88,14 @@ router.post('/reg', async function (ctx, next) {
     }
   }
 });
+
 // 登录页
 router.get('/login', async function (ctx, next) {
   await ctx.render('login', {
     title: 'EVA管理平台-登录'
   });
 });
+
 // 提交登录信息
 router.post('/login', async function (ctx, next) {
   //需要判断的逻辑：用户名不存在或者密码错误
@@ -103,7 +113,6 @@ router.post('/login', async function (ctx, next) {
       ctx.session.user = user.attributes.username;
       return ctx.response.redirect('/'); 
     } else {
-      //return ctx.response.redirect('/login');
       await ctx.render('login', {
         title: 'EVA管理平台-登录',
         error: '密码错误'
@@ -111,6 +120,7 @@ router.post('/login', async function (ctx, next) {
     }
   }
 });
+
 // 登出请求
 router.get('/logout', async function (ctx, next) {
   ctx.session.user = null;
@@ -157,7 +167,7 @@ router.get('/user_manage', async function (ctx, next) {
 /**采用AJAX处理前端发回的请求
  * 用户管理页
  * 根据action值的不同完成对应的操作：
- * 0 - 分页显示
+ * 0 - 对原始结果分页显示
  * 1 - 模糊搜索
  * 2 - 添加新用户
  * 3 - 删除用户
@@ -277,7 +287,6 @@ router.post('/user_manage',async function(ctx,next) {
     ctx.body = {ret};
   }
 });
-
 
 /**-------------------------------------------------------------
  * 角色管理页
@@ -424,7 +433,6 @@ router.post('/role_manage',async function(ctx,next) {
       请记住这个序列！`;
       ctx.body = {ret};
     }
-    
 
   } else if (ctx.request.body.action == 3) {
     var id = ctx.request.body.content;
@@ -612,7 +620,6 @@ router.post('/study_manage',async function(ctx,next) {
       studies[len] = results.models[len].attributes;
     }
     ctx.body = {studies,len};
-    
   }
 });
 
@@ -646,7 +653,6 @@ router.get('/site_manage', async function (ctx, next) {
   } else {
     return ctx.redirect('/login');
   }
-  
 });
 
 /**采用AJAX处理前端发回的请求
@@ -740,7 +746,6 @@ router.post('/site_manage',async function(ctx,next) {
       sites[len] = results.models[len].attributes;
     }
     ctx.body = {sites,len};
-
   }
 });
 
