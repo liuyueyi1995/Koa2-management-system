@@ -8,10 +8,6 @@ html
     script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
     script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
-    script.
-      Handlebars.registerHelper('timestamps', function(timestamps){
-        return new Date(timestamps).toString();
-     }); //对时间戳的处理函数
     script#table-template(type="text/x-handlebars-template").
       {{#each users}}
         <tr class="success">
@@ -24,8 +20,8 @@ html
           <td>{{title}}</td>
           <td>{{state}}</td>
           <td>{{type}}</td>
-          <td>{{timestamps created_at}}</td>
-          <td>{{timestamps updated_at}}</td>
+          <td>{{created_at}}</td>
+          <td>{{updated_at}}</td>
           <td><button class="btn btn-info btn-xs btn-block btn-upd" type="button" data-toggle="modal" data-target="#update" data-result='{"id":{{id}},"email":"{{email}}","name":"{{name}}","phone":"{{phone}}","address":"{{address}}","site":"{{site}}","title":"{{title}}","state":"{{state}}","type":"{{type}}"}'>修改基本信息</button></td>
           <td><button class="btn btn-primary btn-xs btn-block btn-upd-password" type="button" data-toggle="modal" data-target="#update_password" data-id={{id}}>修改密码</button></td>
           <td><button class="btn btn-danger btn-xs btn-block btn-del" type="button" data-toggle="modal" data-target="#delete" data-id={{id}}>删除</button></td>

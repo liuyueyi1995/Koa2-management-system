@@ -192,8 +192,8 @@ router.get('/user_manage', async function (ctx, next) {
       "title":origin_results.models[i].attributes.title,
       "state":origin_results.models[i].attributes.state,
       "type":origin_results.models[i].attributes.type,
-      "createdAt":origin_results.models[i].attributes.created_at,
-      "updatedAt":origin_results.models[i].attributes.updated_at,
+      "createdAt":origin_results.models[i].attributes.created_at.format('yyyy-MM-dd hh:mm:ss'),
+      "updatedAt":origin_results.models[i].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss'),
     }
   }
   if (ctx.session.user) {
@@ -229,7 +229,10 @@ router.post('/user_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       users[len] = results.models[len].attributes;
+      users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
+    console.log(users)
     ctx.body = {users,len};
 
   } else if (ctx.request.body.action == 1) {
@@ -253,6 +256,8 @@ router.post('/user_manage',async function(ctx,next) {
     var page_num = results.pagination['pageCount']; 
     for(;len < results.length;len++){
       users[len] = results.models[len].attributes;
+      users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {users,len,page_num};
 
@@ -316,6 +321,8 @@ router.post('/user_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       users[len] = results.models[len].attributes;
+      users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {users,len};
     
@@ -355,8 +362,11 @@ router.get('/role_manage', async function (ctx, next) {
       "type":origin_results.models[i].attributes.type,
       "state":origin_results.models[i].attributes.state,
       "expiring_date":origin_results.models[i].attributes.expiring_date,
-      "createdAt":origin_results.models[i].attributes.created_at,
-      "updatedAt":origin_results.models[i].attributes.updated_at
+      "createdAt":origin_results.models[i].attributes.created_at.format('yyyy-MM-dd hh:mm:ss'),
+      "updatedAt":origin_results.models[i].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss')
+    }
+    if (origin_results.models[i].attributes.expiring_date != null) {
+      results[i].expiring_date = origin_results.models[i].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
     }
   }
   var origin_users = await model.Users.query('orderBy', 'id', 'asc').fetchAll();
@@ -411,6 +421,11 @@ router.post('/role_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
+      if (results.models[len].attributes.expiring_date != null) {
+        roles[len].expiring_date = results.models[len].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
+      }
+      roles[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      roles[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {roles,len};
 
@@ -437,6 +452,11 @@ router.post('/role_manage',async function(ctx,next) {
     var page_num = results.pagination['pageCount'];
     for(;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
+      if (results.models[len].attributes.expiring_date != null) {
+        roles[len].expiring_date = results.models[len].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
+      }
+      roles[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      roles[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {roles,len,page_num};
 
@@ -516,6 +536,11 @@ router.post('/role_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       roles[len] = results.models[len].attributes;
+      if (results.models[len].attributes.expiring_date != null) {
+        roles[len].expiring_date = results.models[len].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
+      }
+      roles[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      roles[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {roles,len};
     
@@ -554,8 +579,11 @@ router.get('/study_manage', async function (ctx, next) {
       "type":origin_results.models[i].attributes.type,
       "due_date":origin_results.models[i].attributes.due_date,
       "need_audit":origin_results.models[i].attributes.need_audit,
-      "createdAt":origin_results.models[i].attributes.created_at,
-      "updatedAt":origin_results.models[i].attributes.updated_at
+      "createdAt":origin_results.models[i].attributes.created_at.format('yyyy-MM-dd hh:mm:ss'),
+      "updatedAt":origin_results.models[i].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss')
+    }
+    if (origin_results.models[i].attributes.due_date != null) {
+      results[i].due_date = origin_results.models[i].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
     }
   }
   if (ctx.session.user) {
@@ -589,6 +617,11 @@ router.post('/study_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       studies[len] = results.models[len].attributes;
+      if (results.models[len].attributes.due_date != null) {
+        studies[len].due_date = results.models[len].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
+      }
+      studies[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      studies[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {studies,len};
 
@@ -608,6 +641,11 @@ router.post('/study_manage',async function(ctx,next) {
     var page_num = results.pagination['pageCount']; 
     for(;len < results.length;len++){
       studies[len] = results.models[len].attributes;
+      if (results.models[len].attributes.due_date != null) {
+        studies[len].due_date = results.models[len].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
+      }
+      studies[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      studies[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {studies,len,page_num};
 
@@ -661,6 +699,11 @@ router.post('/study_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       studies[len] = results.models[len].attributes;
+      if (results.models[len].attributes.due_date != null) {
+        studies[len].due_date = results.models[len].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
+      }
+      studies[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      studies[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {studies,len};
   }
@@ -684,8 +727,8 @@ router.get('/site_manage', async function (ctx, next) {
       "type":origin_results.models[i].attributes.type,
       "address":origin_results.models[i].attributes.address,
       "code":origin_results.models[i].attributes.code,
-      "createdAt":origin_results.models[i].attributes.created_at,
-      "updatedAt":origin_results.models[i].attributes.updated_at,
+      "createdAt":origin_results.models[i].attributes.created_at.format('yyyy-MM-dd hh:mm:ss'),
+      "updatedAt":origin_results.models[i].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss'),
     }
   }
   if (ctx.session.user) {
@@ -719,6 +762,8 @@ router.post('/site_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       sites[len] = results.models[len].attributes;
+      sites[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      sites[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {sites,len};
 
@@ -739,6 +784,8 @@ router.post('/site_manage',async function(ctx,next) {
     var page_num = results.pagination['pageCount']; 
     for(;len < results.length;len++){
       sites[len] = results.models[len].attributes;
+      sites[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      sites[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {sites,len,page_num};
 
@@ -787,6 +834,8 @@ router.post('/site_manage',async function(ctx,next) {
     });
     for(;len < results.length;len++){
       sites[len] = results.models[len].attributes;
+      sites[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      sites[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
     ctx.body = {sites,len};
   }
