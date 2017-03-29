@@ -252,8 +252,10 @@ html
           $.post('/role_manage',{content:content,action:1},function(result){
             let length = result.len;
             if ($.isEmptyObject(result.roles)) { //如果没有查询到数据则返回提示
+              $('#banner-search').parent().addClass('hidden');
               $('#banner-danger span').text("没有匹配的结果!").parent().parent().removeClass('hidden');
             } else { //如果查询到数据则动态生成表格  
+              $('#banner-danger').parent().addClass('hidden');
               $('#banner-search span').text("搜索结果如下：").parent().parent().removeClass('hidden');             
               let tbody = $('tbody');
               tbody.html("");
@@ -269,6 +271,7 @@ html
             }
           });
         } else {
+          $('#banner-search').parent().addClass('hidden');
           $('#banner-danger span').text("请输入搜索条件!").parent().parent().removeClass('hidden');
         }
       }
@@ -332,7 +335,7 @@ html
               span.input-group-btn
                 - var users = results.users,studies = results.studies
                 button.btn.btn-warning#btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加角色信息
-              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
+              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询(区分大小写)',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
       //表格      
