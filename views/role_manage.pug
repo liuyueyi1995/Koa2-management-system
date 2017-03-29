@@ -190,11 +190,13 @@ html
             "user":user,
             "study":study,
             "type":type,
-            "state":state,
-            "expiring_date":expiring_date
+            "state":state
           };
           if (site) {
             newRole.site = site;
+          }
+          if (expiring_date) {
+            newRole.expiring_date = expiring_date;
           }
           $.ajax(
             {
@@ -286,9 +288,11 @@ html
         let expiring_date = $('#expiring_date_upd').val();
         let newRole = {
           "id":id,
-          "state":state,
-          "expiring_date":expiring_date
+          "state":state
         };
+        if (expiring_date) {
+          newRole.expiring_date = expiring_date;
+        }
         $.ajax(
           {
             url:'/role_manage',
