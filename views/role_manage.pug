@@ -75,11 +75,6 @@ html
               option.appendTo(select_study); //添加节点
             }
           });
-          $('#searchBox').bind('input propertychange',function() { //实时监听搜索框的内容，当内容变为空时，刷新页面
-            if ($.trim($('#searchBox').val()) == '') {
-              location.reload();
-            }
-          });
           $('body').on('change','#type',function(){ //级联下拉菜单，当选中的项目改变时，触发ajax修改机构信息
             let type = $(this).val();
             let id = $('#study').val();
@@ -116,10 +111,8 @@ html
                 }
               );
             }
-
           });
-          $('body').on('click','.page',function() { 
-            //处理分页请求，获取要跳转到的页码以及此时搜索框的内容，如果有内容，则返回搜索结果对应页的内容，如果搜索框为空，则返回全部结果对应页的内容
+          $('body').on('click','.page',function() { //分页按钮 根据搜索框是否有内容，来决定触发AJAX的action值
             $(this).siblings().removeClass('active'); //被点击的按钮变为active
             $(this).addClass('active');
             let page = $(this).attr("page");
@@ -152,9 +145,9 @@ html
                 }
               }
             );
-          });
+          }); 
         });
-      });
+      }); 
 
       function add() {
         let user = $('#user').val();
@@ -194,10 +187,10 @@ html
           };
           if (site) {
             newRole.site = site;
-          }
+          } 
           if (expiring_date) {
             newRole.expiring_date = expiring_date;
-          }
+          } 
           $.ajax(
             {
               url:'/role_manage',
@@ -259,11 +252,9 @@ html
           $.post('/role_manage',{content:content,action:1},function(result){
             let length = result.len;
             if ($.isEmptyObject(result.roles)) { //如果没有查询到数据则返回提示
-              alert(`
-              No result matched the given condition!
-
-              Please retry!`);
-            } else { //如果查询到数据则动态生成表格               
+              $('#banner-danger span').text("没有匹配的结果!").parent().parent().removeClass('hidden');
+            } else { //如果查询到数据则动态生成表格  
+              $('#banner-search span').text("搜索结果如下：").parent().parent().removeClass('hidden');             
               let tbody = $('tbody');
               tbody.html("");
               var tableTemplate = Handlebars.compile($("#table-template").html()); //使用handlebars模板完成数据的循环填充和变量插入
@@ -278,7 +269,7 @@ html
             }
           });
         } else {
-          alert('There is no condition!');
+          $('#banner-danger span').text("请输入搜索条件!").parent().parent().removeClass('hidden');
         }
       }
 
@@ -302,7 +293,7 @@ html
               $("#tips").html("<span style='color:blue'>正在处理...</span>");
             },
             success: function(result) {
-              if (result) {
+              if (result) { 
                 alert(result.ret);
                 location.reload();
               } else {
@@ -321,6 +312,15 @@ html
 
   body
     div.container
+      //提示栏
+      div.row.hidden
+        div#banner-danger.alert.alert-danger.alert-dismissable 
+          span 将返回信息显示在这里
+          button.close(type="type" data-dismiss="alert" aria-hidden="true") &times;
+      div.row.hidden
+        div#banner-search.alert.alert-info.alert-dismissable 
+          span 搜索结果如下：
+          a(href="/role_manage" style="float:right") 返回搜索前的原始结果
       //标题和搜索框
       div.row
         ul.list-inline
