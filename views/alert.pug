@@ -1,4 +1,8 @@
 - if (success)
-  div.alert.alert-success= success
+  div.alert.alert-success.alert-dismissable 
+    button.close(type="type" data-dismiss="alert" aria-hidden="true") &times;
+    = success
 - if (error)
-  div.alert.alert-danger= error
+  div.alert.alert-danger.alert-dismissable 
+    button.close(type="type" data-dismiss="alert" aria-hidden="true") &times;
+    = error
