@@ -60,11 +60,6 @@ html
             $('#del_confirm').html('确认删除 id = ' + $(this).attr("data-id")+' 的用户?');
             $('#del_id').html($(this).attr("data-id"));
           });
-          $('#searchBox').bind('input propertychange',function() { //实时监听搜索框的内容，当内容变为空时，刷新页面
-            if ($.trim($('#searchBox').val()) == '') {
-              location.reload();
-            }
-          });
           $('body').on('click','.page',function() { //分页按钮 根据搜索框是否有内容，来决定触发AJAX的action值
             $(this).siblings().removeClass('active'); //被点击的按钮变为active
             $(this).addClass('active');
