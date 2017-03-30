@@ -246,7 +246,6 @@ html
         let content = $.trim($('#searchBox').val());
         if (content) {
           $.post('/role_manage',{content:content,action:1},function(result){
-            let length = result.len;
             if ($.isEmptyObject(result.roles)) { //如果没有查询到数据则返回提示
               $('#banner-search').parent().addClass('hidden');
               $('#banner-danger span').text("没有匹配的结果!").parent().parent().removeClass('hidden');

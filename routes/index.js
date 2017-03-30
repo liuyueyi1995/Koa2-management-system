@@ -221,22 +221,20 @@ router.get('/user_manage', async function (ctx, next) {
 router.post('/user_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) {
     var users = {};
-    var len = 0;
     var content = ctx.request.body.content.page;
     var results = await model.Users.query('orderBy', 'id', 'asc').fetchPage({
       page: content,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       users[len] = results.models[len].attributes;
       users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {users,len};
+    ctx.body = {users};
 
   } else if (ctx.request.body.action == 1) {
     var users = {};
-    var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
     var results = await model.Users.query('orderBy', 'id', 'asc').query(function(qb) {
@@ -253,12 +251,12 @@ router.post('/user_manage',async function(ctx,next) {
       pageSize: 10
     });
     var page_num = results.pagination['pageCount']; 
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       users[len] = results.models[len].attributes;
       users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {users,len,page_num};
+    ctx.body = {users,page_num};
 
   } else if (ctx.request.body.action == 2) {
     var content = ctx.request.body.content;
@@ -324,7 +322,6 @@ router.post('/user_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 5) {
     var users = {};
-    var len = 0;
     var content = ctx.request.body.content.search_content;
     var content1 = '%'+content+'%'; 
     var results = await model.Users.query('orderBy', 'id', 'asc').query(function(qb) {
@@ -340,12 +337,12 @@ router.post('/user_manage',async function(ctx,next) {
       page: ctx.request.body.content.page,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       users[len] = results.models[len].attributes;
       users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {users,len};
+    ctx.body = {users};
     
   } else if (ctx.request.body.action == 6) {
     var content = ctx.request.body.content;
@@ -373,7 +370,6 @@ router.post('/user_manage',async function(ctx,next) {
 router.get('/role_manage', async function (ctx, next) {
   var results = {};
   var users = {};
-  var ids = {};
   var studies = {};
   var origin_results = await model.Roles.forge().query('orderBy', 'id', 'asc').fetchPage({
       page: 1,
@@ -414,7 +410,7 @@ router.get('/role_manage', async function (ctx, next) {
   if (ctx.session.user) {
     await ctx.render('role_manage', {
       title: 'EVA管理平台-角色管理',
-      results: {results,users,studies,ids,page_num}
+      results: {results,users,studies,page_num}
     });
   } else {
     return ctx.redirect('/login');
@@ -435,7 +431,6 @@ router.get('/role_manage', async function (ctx, next) {
 router.post('/role_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) { 
     var roles = {};
-    var len = 0;
     var content = ctx.request.body.content.page;
     var results = await model.Roles.query(function(qb) {
       qb //使用leftJoin，即使有的行site.name为空值，也可以被搜索出来
@@ -447,7 +442,7 @@ router.post('/role_manage',async function(ctx,next) {
       page: content,
       pageSize: 10
     });
-    for(;len < results.length;len++) {
+    for(var len = 0;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
       if (results.models[len].attributes.expiring_date != null) {
         roles[len].expiring_date = results.models[len].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
@@ -455,11 +450,10 @@ router.post('/role_manage',async function(ctx,next) {
       roles[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       roles[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {roles,len};
+    ctx.body = {roles};
 
   } else if (ctx.request.body.action == 1) {
     var roles = {};
-    var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
     var results = await model.Roles.query(function(qb) {
@@ -478,7 +472,7 @@ router.post('/role_manage',async function(ctx,next) {
       pageSize: 10
     });
     var page_num = results.pagination['pageCount'];
-    for(;len < results.length;len++) {
+    for(var len = 0;len < results.length;len++) {
       roles[len] = results.models[len].attributes;
       if (results.models[len].attributes.expiring_date != null) {
         roles[len].expiring_date = results.models[len].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
@@ -486,7 +480,7 @@ router.post('/role_manage',async function(ctx,next) {
       roles[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       roles[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {roles,len,page_num};
+    ctx.body = {roles,page_num};
 
   } else if (ctx.request.body.action == 2) {
     var user_id = ctx.request.body.content['user'];
@@ -564,7 +558,6 @@ router.post('/role_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 5) {
     var roles = {};
-    var len = 0;
     var content = ctx.request.body.content.search_content;
     var content1 = '%'+content+'%'; 
     var results = await model.Roles.query(function(qb) {
@@ -582,7 +575,7 @@ router.post('/role_manage',async function(ctx,next) {
       page: ctx.request.body.content.page,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       roles[len] = results.models[len].attributes;
       if (results.models[len].attributes.expiring_date != null) {
         roles[len].expiring_date = results.models[len].attributes.expiring_date.format('yyyy-MM-dd hh:mm:ss');
@@ -590,7 +583,7 @@ router.post('/role_manage',async function(ctx,next) {
       roles[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       roles[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {roles,len};
+    ctx.body = {roles};
     
   } else if (ctx.request.body.action == 7) {
     var sites = {};
@@ -657,13 +650,12 @@ router.get('/study_manage', async function (ctx, next) {
 router.post('/study_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) {
     var studies = {};
-    var len = 0;
     var content = ctx.request.body.content.page;
     var results = await model.Studies.query('orderBy', 'id', 'asc').fetchPage({
       page: content,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       studies[len] = results.models[len].attributes;
       if (results.models[len].attributes.due_date != null) {
         studies[len].due_date = results.models[len].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
@@ -671,11 +663,10 @@ router.post('/study_manage',async function(ctx,next) {
       studies[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       studies[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {studies,len};
+    ctx.body = {studies};
 
   } else if (ctx.request.body.action == 1) {
     var studies = {};
-    var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
     var results = await model.Studies.query('orderBy', 'id', 'asc').query(function(qb) {
@@ -687,7 +678,7 @@ router.post('/study_manage',async function(ctx,next) {
       pageSize: 10
     });
     var page_num = results.pagination['pageCount']; 
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       studies[len] = results.models[len].attributes;
       if (results.models[len].attributes.due_date != null) {
         studies[len].due_date = results.models[len].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
@@ -695,7 +686,7 @@ router.post('/study_manage',async function(ctx,next) {
       studies[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       studies[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {studies,len,page_num};
+    ctx.body = {studies,page_num};
 
   } else if (ctx.request.body.action == 2) {
     await model.Studies.forge()
@@ -755,7 +746,6 @@ router.post('/study_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 5) {
     var studies = {};
-    var len = 0;
     var content = ctx.request.body.content.search_content;
     var content1 = '%'+content+'%'; 
     var results = await model.Studies.query('orderBy', 'id', 'asc').query(function(qb) {
@@ -766,7 +756,7 @@ router.post('/study_manage',async function(ctx,next) {
       page: ctx.request.body.content.page,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       studies[len] = results.models[len].attributes;
       if (results.models[len].attributes.due_date != null) {
         studies[len].due_date = results.models[len].attributes.due_date.format('yyyy-MM-dd hh:mm:ss');
@@ -774,7 +764,7 @@ router.post('/study_manage',async function(ctx,next) {
       studies[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       studies[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {studies,len};
+    ctx.body = {studies};
   }
 });
 
@@ -823,22 +813,20 @@ router.get('/site_manage', async function (ctx, next) {
 router.post('/site_manage',async function(ctx,next) { 
   if (ctx.request.body.action == 0) {
     var sites = {};
-    var len = 0;
     var content = ctx.request.body.content.page;
     var results = await model.Sites.query('orderBy', 'id', 'asc').fetchPage({
       page: content,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       sites[len] = results.models[len].attributes;
       sites[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       sites[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {sites,len};
+    ctx.body = {sites};
 
   } else if (ctx.request.body.action == 1) {
     var sites = {};
-    var len = 0;
     var content = ctx.request.body.content;
     var content1 = '%'+content+'%'; 
     var results = await model.Sites.query('orderBy', 'id', 'asc').query(function(qb) {
@@ -851,12 +839,12 @@ router.post('/site_manage',async function(ctx,next) {
       pageSize: 10
     });
     var page_num = results.pagination['pageCount']; 
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       sites[len] = results.models[len].attributes;
       sites[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       sites[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {sites,len,page_num};
+    ctx.body = {sites,page_num};
 
   } else if (ctx.request.body.action == 2) {
     await model.Sites.forge()
@@ -910,7 +898,6 @@ router.post('/site_manage',async function(ctx,next) {
 
   } else if (ctx.request.body.action == 5) {
     var sites = {};
-    var len = 0;
     var content = ctx.request.body.content.search_content;
     var content1 = '%'+content+'%'; 
     var results = await model.Sites.query('orderBy', 'id', 'asc').query(function(qb) {
@@ -922,12 +909,12 @@ router.post('/site_manage',async function(ctx,next) {
       page: ctx.request.body.content.page,
       pageSize: 10
     });
-    for(;len < results.length;len++){
+    for(var len = 0;len < results.length;len++){
       sites[len] = results.models[len].attributes;
       sites[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       sites[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    ctx.body = {sites,len};
+    ctx.body = {sites};
   }
 });
 
