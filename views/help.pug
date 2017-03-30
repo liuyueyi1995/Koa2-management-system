@@ -1,0 +1,52 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+  body
+    div.container
+      //标题
+      div.row
+        ul.list-inline
+          li.col-lg-3.nonpadding
+            p.content-title=title
+      div.row
+        ul.white
+          li 用户管理页
+            ul
+              li 查看用户信息
+              li 添加用户
+              li 删除用户
+              li 修改用户信息
+              li 重置用户密码
+              li 关键词搜索
+          li 角色管理页
+            ul
+              li 查看角色信息
+              li 添加角色
+              li 删除角色
+              li 修改角色信息
+              li 关键词搜索
+          li 项目管理页
+            ul
+              li 查看项目信息
+              li 添加项目
+              li 删除项目
+              li 修改项目信息
+              li 关键词搜索
+          li 机构管理页
+            ul
+              li 查看机构信息
+              li 添加机构
+              li 删除机构
+              li 修改机构信息
+              li 关键词搜索
+          li 日志管理
+            ul
+              li 查看日志
+              li 关键词搜索
+          

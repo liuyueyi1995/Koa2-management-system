@@ -144,7 +144,7 @@ router.post('/login', async function (ctx, next) {
     }
   }
   */
-  if (ctx.request.body['username'] != 'admin') {
+  if (ctx.request.body['username'] != 'admin') { //用户名是admin
     await ctx.render('login', {
       title: 'EVA管理平台-登录',
       error: '用户名不存在'
@@ -855,12 +855,12 @@ router.get('/log_manage', async function (ctx, next) {
 });
 
 /**-------------------------------------------------------------
- * 数据导入页
+ * 使用帮助页
  */ 
-router.get('/import', async function (ctx, next) {
+router.get('/help', async function (ctx, next) {
   if (ctx.session.user) {
-    await ctx.render('import', {
-      title: 'EVA管理平台-数据导入'
+    await ctx.render('help', {
+      title: 'EVA管理平台-使用帮助'
     });
   } else {
     return ctx.redirect('/login');
