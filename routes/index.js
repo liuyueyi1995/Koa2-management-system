@@ -232,7 +232,6 @@ router.post('/user_manage',async function(ctx,next) {
       users[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
       users[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
     }
-    console.log(users)
     ctx.body = {users,len};
 
   } else if (ctx.request.body.action == 1) {
@@ -264,7 +263,8 @@ router.post('/user_manage',async function(ctx,next) {
   } else if (ctx.request.body.action == 2) {
     var content = ctx.request.body.content;
     var password = bcrypt.hashSync(ctx.request.body.content['password'],9);
-    var newUser = new model.Users({
+    await model.Users.forge()
+    .save({
       email: ctx.request.body.content['email'],
       password: password,
       name: ctx.request.body.content['name'],
@@ -274,20 +274,34 @@ router.post('/user_manage',async function(ctx,next) {
       title: ctx.request.body.content['title'],
       state: ctx.request.body.content['state'],
       type: ctx.request.body.content['type']
+    })
+    .then(function() {
+      var ret = '添加成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '添加失败！';
+      console.log(err)
+      ctx.body = {ret};
     });
-    newUser.save();
-    let ret = '添加成功！';
-    ctx.body = {ret};
+    
 
   } else if (ctx.request.body.action == 3) {
     var id = ctx.request.body.content;
-    var result = await model.Users.where('id','=',id).destroy(); 
-    let ret = '删除成功！';
-    ctx.body = {ret};
+    await model.Users.where('id','=',id).destroy()
+    .then(function() {
+      var ret = '删除成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '删除失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
-    new model.Users({id: ctx.request.body.content['id']})
+    await model.Users.forge({id: ctx.request.body.content['id']})
     .save({
       email: ctx.request.body.content['email'],
       name: ctx.request.body.content['name'],
@@ -297,9 +311,16 @@ router.post('/user_manage',async function(ctx,next) {
       title: ctx.request.body.content['title'],
       state: ctx.request.body.content['state'],
       type: ctx.request.body.content['type']
-    }, {patch: true});
-    let ret = '修改成功！';
-    ctx.body = {ret};
+    }, {patch: true})
+    .then(function() {
+      var ret = '修改成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '修改失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 5) {
     var users = {};
@@ -329,12 +350,19 @@ router.post('/user_manage',async function(ctx,next) {
   } else if (ctx.request.body.action == 6) {
     var content = ctx.request.body.content;
     var password = bcrypt.hashSync(ctx.request.body.content['password'],9);
-    new model.Users({id: ctx.request.body.content['id']})
+    await model.Users.forge({id: ctx.request.body.content['id']})
     .save({
       password: password
-    }, {patch: true});
-    let ret = '修改密码成功！';
-    ctx.body = {ret};
+    }, {patch: true})
+    .then(function() {
+      var ret = '修改密码成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '修改密码失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
   }
 });
 
@@ -401,7 +429,7 @@ router.get('/role_manage', async function (ctx, next) {
  * 2 - 添加角色信息
  * 3 - 删除角色信息
  * 4 - 修改
- * 5 - 对搜索结果的分页显示 暂未实现
+ * 5 - 对搜索结果的分页显示 
  * 7 - 根据项目id查询出参与该项目的所有机构信息
  */
 router.post('/role_manage',async function(ctx,next) { 
@@ -461,58 +489,78 @@ router.post('/role_manage',async function(ctx,next) {
     ctx.body = {roles,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
-    var newRole = new model.Roles({
+    var user_id = ctx.request.body.content['user'];
+    var users = await model.Users.where('id','=',user_id).fetch();
+    var type = users.attributes.type; //根据用户类型，采用不同的处理方式
+    await model.Roles.forge()
+    .save({
       user_id: ctx.request.body.content['user'],
       study_id: ctx.request.body.content['study'],
       site_id: ctx.request.body.content['site'],
       type: ctx.request.body.content['type'],
       state: ctx.request.body.content['state'],
       expiring_date: ctx.request.body.content['expiring_date']
-    });
-    newRole.save();
-    var user_id = ctx.request.body.content['user'];
-    var users = await model.Users.where('id','=',user_id).fetch();
-    var type = users.attributes.type; //根据用户类型，采用不同的处理方式
-    if (type == 'EXTERNAL') { //外部用户直接返回添加成功
-      let ret = '添加成功！';
-      ctx.body = {ret};
-    } else if (type == 'INTERNAL') { //内部用户，生成8位字符序列作为登陆口令
-      var chars = "ABCDEFGHJKLMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
-      var space = chars.length;
-      var pwd = "";
-      for (var i = 0; i < 8; i++) {
-        pwd += chars.charAt(Math.floor(Math.random()*space));
-      }
-      var password = bcrypt.hashSync(pwd,9);
-      new model.Users({id: user_id})
-      .save({
-        password: password
-      }, {patch: true}); //修改内部用户的密码
+    })
+    .then(function() {
+      if (type == 'EXTERNAL') { //外部用户直接返回添加成功
+        var ret = '添加成功！';
+        ctx.body = {ret};
+      } else if (type == 'INTERNAL') { //内部用户，生成8位字符序列作为登陆口令
+        var chars = "ABCDEFGHJKLMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
+        var space = chars.length;
+        var pwd = "";
+        for (var i = 0; i < 8; i++) {
+          pwd += chars.charAt(Math.floor(Math.random()*space));
+        }
+        var password = bcrypt.hashSync(pwd,9);
+        new model.Users({id: user_id})
+        .save({
+          password: password
+        }, {patch: true}); //修改内部用户的密码
 
-      let ret = `添加成功！
-      
-      你的临时登录口令为: `+pwd+`
-      
-      请记住这个序列！`;
+        var ret = `添加成功！
+        
+        你的临时登录口令为:`+pwd+`
+        
+        请记住这个序列！`;
+        ctx.body = {ret};
+      }
+    })
+    .catch(function(err) {
+      var ret = '添加失败！';
+      console.log(err)
       ctx.body = {ret};
-    }
+    })
 
   } else if (ctx.request.body.action == 3) {
     var id = ctx.request.body.content;
-    var result = await model.Roles.where('id','=',id).destroy(); 
-    let ret = '删除成功！';
-    ctx.body = {ret};
+    await model.Roles.where('id','=',id).destroy()
+    .then(function() {
+      var ret = '删除成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '删除失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
-    console.log(content)
-    new model.Roles({id: ctx.request.body.content['id']})
+    await model.Roles.forge({id: ctx.request.body.content['id']})
     .save({
       state: ctx.request.body.content['state'],
       expiring_date: ctx.request.body.content['expiring_date']
-    }, {patch: true});
-    let ret = '状态修改成功！';
-    ctx.body = {ret};
+    }, {patch: true})
+    .then(function() {
+      var ret = '修改成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '修改失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 5) {
     var roles = {};
@@ -650,7 +698,8 @@ router.post('/study_manage',async function(ctx,next) {
     ctx.body = {studies,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
-    var newStudy = new model.Studies({
+    await model.Studies.forge()
+    .save({
       uid: ctx.request.body.content['uid'],
       name: ctx.request.body.content['name'],
       state: ctx.request.body.content['state'],
@@ -658,20 +707,33 @@ router.post('/study_manage',async function(ctx,next) {
       type: ctx.request.body.content['type'],
       due_date:  ctx.request.body.content['due_date'],
       need_audit: ctx.request.body.content['need_audit']
+    })
+    .then(function() {
+      var ret = '添加成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '添加失败！';
+      console.log(err)
+      ctx.body = {ret};
     });
-    newStudy.save();
-    let ret = '添加成功！';
-    ctx.body = {ret};
 
   } else if (ctx.request.body.action == 3) {
     var id = ctx.request.body.content;
-    var result = await model.Studies.where('id','=',id).destroy(); 
-    let ret = '删除成功！';
-    ctx.body = {ret};
+    await model.Studies.where('id','=',id).destroy()
+    .then(function() {
+      var ret = '删除成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '删除失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 4) {
     var content = ctx.request.body.content;
-    new model.Studies({id: ctx.request.body.content['id']})
+    await model.Studies.forge({id: ctx.request.body.content['id']})
     .save({
       uid: ctx.request.body.content['uid'],
       name: ctx.request.body.content['name'],
@@ -680,9 +742,16 @@ router.post('/study_manage',async function(ctx,next) {
       type: ctx.request.body.content['type'],
       due_date: ctx.request.body.content['due_date'],
       need_audit: ctx.request.body.content['need_audit']
-    }, {patch: true});
-    let ret = '修改成功！';
-    ctx.body = {ret};
+    }, {patch: true})
+    .then(function() {
+      var ret = '修改成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '修改失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 5) {
     var studies = {};
@@ -790,33 +859,54 @@ router.post('/site_manage',async function(ctx,next) {
     ctx.body = {sites,len,page_num};
 
   } else if (ctx.request.body.action == 2) {
-    var newSite = new model.Sites({
-      name: ctx.request.body.content['name'],
-      type: ctx.request.body.content['type'],
-      address: ctx.request.body.content['address'],
-      code: ctx.request.body.content['code']
-    });
-    newSite.save();
-    let ret = '添加成功！';
-    ctx.body = {ret};
-
-  } else if (ctx.request.body.action == 3) {
-    var id = ctx.request.body.content;
-    var result = await model.Sites.where('id','=',id).destroy(); 
-    let ret = '删除成功！';
-    ctx.body = {ret};
-
-  } else if (ctx.request.body.action == 4) {
-    var content = ctx.request.body.content;
-    new model.Sites({id: ctx.request.body.content['id']})
+    await model.Sites.forge()
     .save({
       name: ctx.request.body.content['name'],
       type: ctx.request.body.content['type'],
       address: ctx.request.body.content['address'],
       code: ctx.request.body.content['code']
-    }, {patch: true});
-    let ret = '修改成功！';
-    ctx.body = {ret};
+    })
+    .then(function() {
+      var ret = '添加成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '添加失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
+
+  } else if (ctx.request.body.action == 3) {
+    var id = ctx.request.body.content;
+    await model.Sites.where('id','=',id).destroy()
+    .then(function() {
+      var ret = '删除成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '删除失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
+
+  } else if (ctx.request.body.action == 4) {
+    var content = ctx.request.body.content;
+    await model.Sites.forge({id: ctx.request.body.content['id']})
+    .save({
+      name: ctx.request.body.content['name'],
+      type: ctx.request.body.content['type'],
+      address: ctx.request.body.content['address'],
+      code: ctx.request.body.content['code']
+    }, {patch: true})
+    .then(function() {
+      var ret = '修改成功！';
+      ctx.body = {ret};
+    })
+    .catch(function(err) {
+      var ret = '修改失败！';
+      console.log(err)
+      ctx.body = {ret};
+    });
 
   } else if (ctx.request.body.action == 5) {
     var sites = {};
