@@ -197,8 +197,13 @@ html
               },
               success: function(result) {
                 if (result) {
-                  alert(result.ret);
-                  location.reload();
+                  $('#add').modal('hide');
+                  $('#infoBody').text(result.ret);
+                  $('#infoReturn').modal('show');
+                  $('#btn-confirm').click(function() {
+                    $('#infoReturn').modal('hide');
+                    location.reload();
+                  });
                 } else {
                   $("#tips").html("<span style='color:blue'>出现错误！</span>");
                 }
@@ -226,8 +231,13 @@ html
             },
             success: function(result) {
               if (result) {
-                alert(result.ret);
-                location.reload();
+                $('#delete').modal('hide');
+                  $('#infoBody').text(result.ret);
+                  $('#infoReturn').modal('show');
+                  $('#btn-confirm').click(function() {
+                    $('#infoReturn').modal('hide');
+                    location.reload();
+                  });
               } else {
                 $("#tips1").html("<span style='color:blue'>出现错误！</span>");
               }
@@ -292,8 +302,13 @@ html
             },
             success: function(result) {
               if (result) { 
-                alert(result.ret);
-                location.reload();
+                $('#update').modal('hide');
+                  $('#infoBody').text(result.ret);
+                  $('#infoReturn').modal('show');
+                  $('#btn-confirm').click(function() {
+                    $('#infoReturn').modal('hide');
+                    location.reload();
+                  });
               } else {
                 $("#tips").html("<span style='color:blue'>出现错误！</span>");
               }
@@ -369,6 +384,16 @@ html
             li.page(page=i): a #{i}
           li.page(page="last" page_max=results.page_num)
             a &raquo;
+      //显示返回信息的模态框
+      div.modal.fade#infoReturn(tabindex='-1',role='dialog',aria-labelledby='delLabel',aria-hidden='true')
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              button.close(type='button' data-dismiss='modal' aria-hidden='true') &times;
+              h4 返回信息
+            div.modal-body#infoBody 返回的提示信息
+            div.modal-footer
+              button.btn.btn-primary#btn-confirm(type='submit') 确认
       //修改角色的模态框
       div.modal.fade#update(tabindex='-1',role='dialog',aria-labelledby='updLabel',aria-hidden='true')
         div.modal-dialog
