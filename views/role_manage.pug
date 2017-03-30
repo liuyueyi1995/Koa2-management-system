@@ -38,6 +38,12 @@ html
           $('.btn-delete').click(del); //模态框里的删除按钮 触发ajax
           $('.btn-update').click(update); //模态框里的修改按钮 触发ajax
           $('.btn-search').click(search); //搜索栏的搜索按钮 利用css实现搜索
+          $('body').on('click','#btn-confirm',function() { //返回信息模态框的确认按钮，点击之后隐藏模态框
+            $('#infoReturn').modal('hide');
+          });
+          $('#infoReturn').on('hidden.bs.modal', function () { //返回信息模态框隐藏之后，刷新页面
+            location.reload();
+          });
           $('body').on('click','.btn-upd',function() { //表格里的修改按钮 将该行的信息写入模态框
             let origin_info = $(this).attr("data-result");
             let info_obj = eval('('+origin_info+')'); //字符串转换成json对象
@@ -200,10 +206,6 @@ html
                   $('#add').modal('hide');
                   $('#infoBody').text(result.ret);
                   $('#infoReturn').modal('show');
-                  $('#btn-confirm').click(function() {
-                    $('#infoReturn').modal('hide');
-                    location.reload();
-                  });
                 } else {
                   $("#tips").html("<span style='color:blue'>出现错误！</span>");
                 }
@@ -232,12 +234,8 @@ html
             success: function(result) {
               if (result) {
                 $('#delete').modal('hide');
-                  $('#infoBody').text(result.ret);
-                  $('#infoReturn').modal('show');
-                  $('#btn-confirm').click(function() {
-                    $('#infoReturn').modal('hide');
-                    location.reload();
-                  });
+                $('#infoBody').text(result.ret);
+                $('#infoReturn').modal('show');
               } else {
                 $("#tips1").html("<span style='color:blue'>出现错误！</span>");
               }
@@ -257,10 +255,8 @@ html
         if (content) {
           $.post('/role_manage',{content:content,action:1},function(result){
             if ($.isEmptyObject(result.roles)) { //如果没有查询到数据则返回提示
-              $('#banner-search').parent().addClass('hidden');
               $('#banner-danger span').text("没有匹配的结果!").parent().parent().removeClass('hidden');
             } else { //如果查询到数据则动态生成表格  
-              $('#banner-danger').parent().addClass('hidden');
               $('#banner-search span').text("搜索结果如下：").parent().parent().removeClass('hidden');             
               let tbody = $('tbody');
               tbody.html("");
@@ -276,7 +272,6 @@ html
             }
           });
         } else {
-          $('#banner-search').parent().addClass('hidden');
           $('#banner-danger span').text("请输入搜索条件!").parent().parent().removeClass('hidden');
         }
       }
@@ -303,12 +298,8 @@ html
             success: function(result) {
               if (result) { 
                 $('#update').modal('hide');
-                  $('#infoBody').text(result.ret);
-                  $('#infoReturn').modal('show');
-                  $('#btn-confirm').click(function() {
-                    $('#infoReturn').modal('hide');
-                    location.reload();
-                  });
+                $('#infoBody').text(result.ret);
+                $('#infoReturn').modal('show');
               } else {
                 $("#tips").html("<span style='color:blue'>出现错误！</span>");
               }
@@ -345,7 +336,7 @@ html
               span.input-group-btn
                 - var users = results.users,studies = results.studies
                 button.btn.btn-warning#btn-ad(type='button',data-user=users,data-study=studies,data-toggle="modal",data-target="#add") 添加角色信息
-              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询(区分大小写)',required)
+              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
               span.input-group-btn
                 button.btn.btn-warning.btn-search(type='button') 搜索
       //表格      
