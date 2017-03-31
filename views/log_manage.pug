@@ -1,3 +1,72 @@
-br
-br
-p(style="color:aliceblue;font-size:48px;margin-left:10px") 暂未开放“日志管理”功能。
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet' href='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/stylesheets/mycss.css')
+    script(src='http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js')
+    script(src='http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js')
+    script(src='/js/log_manage.js')
+    script#table-template(type="text/x-handlebars-template").
+      {{#each logs}}
+        <tr class="success">
+          <td>{{id}}</td>
+          <td>{{entity}}</td>
+          <td>{{action}}</td>
+          <td>{{message}}</td>
+          <td>{{user_id}}</td>
+          <td>{{user_name}}</td>
+          <td>{{created_at}}</td>
+        </tr>
+      {{/each}}
+  body
+    div.container
+      //提示栏
+      div.row.hidden
+        div#banner-danger.alert.alert-danger.alert-dismissable 
+          span 将返回信息显示在这里
+          button.close(type="type" data-dismiss="alert" aria-hidden="true") &times;
+      div.row.hidden
+        div#banner-search.alert.alert-info.alert-dismissable 
+          span 搜索结果如下：
+          a(href="/log_manage" style="float:right") 返回搜索前的原始结果
+      //标题和搜索框
+      div.row
+        ul.list-inline
+          li.col-lg-3.nonpadding
+            p.content-title=title
+          li.col-lg-6.nonpadding
+          li.float-right.col-lg-3.nonpadding
+            div.input-group
+              input#searchBox.form-control(type='text',placeholder='输入关键字，支持模糊查询',required)
+              span.input-group-btn
+                button.btn.btn-warning.btn-search(type='button') 搜索
+      //表格     
+      div.row
+        table.table
+          thead
+            tr
+              th 序号
+              th 实体
+              th 行为
+              th 详细信息
+              th 用户id
+              th 用户名
+              th 发生时间
+          tbody
+            each result in results.results
+              tr
+              each val in result
+                td.success #{val}
+              
+      //分页
+      div.row(style="text-align:center;")
+        ul.pagination#pagination(style="margin:0 auto;")
+          li.page(page="first")
+            a &laquo;
+          - for (var i = 1; i < results.page_num+1; i++)
+            li.page(page=i): a #{i}
+          li.page(page="last" page_max=results.page_num)
+            a &raquo;

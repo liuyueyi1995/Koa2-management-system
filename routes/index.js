@@ -1,3 +1,6 @@
+/**
+ * Author: liuyueyi0126@qq.com
+ */
 var router = require('koa-router')();
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
@@ -923,12 +926,95 @@ router.post('/site_manage',async function(ctx,next) {
  * 日志管理页
  */ 
 router.get('/log_manage', async function (ctx, next) {
+  var origin_results = await model.Logs.query('orderBy', 'id', 'asc').fetchPage({
+      page: 1,
+      pageSize: 10
+    });
+  var page_num = origin_results.pagination['pageCount']; 
+  var results = {};
+  for(var i = 0;i < origin_results.length;i++){
+    results[i] = {
+      "id":origin_results.models[i].attributes.id,
+      "entity":origin_results.models[i].attributes.entity,
+      "action":origin_results.models[i].attributes.action,
+      "message":origin_results.models[i].attributes.message,
+      "user_id":origin_results.models[i].attributes.user_id,
+      "user_name":origin_results.models[i].attributes.user_name,
+      "createdAt":origin_results.models[i].attributes.created_at.format('yyyy-MM-dd hh:mm:ss')
+    }
+  }
   if (ctx.session.user) {
     await ctx.render('log_manage', {
-      title: 'EVA管理平台-日志管理'
+      title: 'EVA管理平台-日志管理',
+      results: {results,page_num}
     });
   } else {
     return ctx.redirect('/login');
+  }
+});
+
+/**采用AJAX处理前端发回的请求
+ * 日志管理页
+ * 根据action值的不同完成对应的操作：
+ * 0 - 分页显示
+ * 1 - 模糊搜索
+ * 5 - 对搜索结果的分页显示 暂未实现
+ */
+router.post('/log_manage',async function(ctx,next) { 
+  if (ctx.request.body.action == 0) {
+    var logs = {};
+    var content = ctx.request.body.content.page;
+    var results = await model.Logs.query('orderBy', 'id', 'asc').fetchPage({
+      page: content,
+      pageSize: 10
+    });
+    for(var len = 0;len < results.length;len++){
+      logs[len] = results.models[len].attributes;
+      logs[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      logs[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
+    }
+    ctx.body = {logs};
+
+  } else if (ctx.request.body.action == 1) {
+    var logs = {};
+    var content = ctx.request.body.content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Logs.query('orderBy', 'id', 'asc').query(function(qb) {
+      qb.where('entity','like',content1)
+      .orWhere('action','like',content1)
+      .orWhere('message','like',content1)
+      .orWhere('user_name','like',content1)
+    }).fetchPage({
+      page: 1,
+      pageSize: 10
+    });
+    var page_num = results.pagination['pageCount']; 
+    for(var len = 0;len < results.length;len++){
+      logs[len] = results.models[len].attributes;
+      logs[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      logs[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
+    }
+    ctx.body = {logs,page_num};
+
+  } else if (ctx.request.body.action == 5) {
+    var logs = {};
+    var content = ctx.request.body.content.search_content;
+    var content1 = '%'+content+'%'; 
+    var results = await model.Logs.query('orderBy', 'id', 'asc').query(function(qb) {
+      qb.where('entity','like',content1)
+      .orWhere('action','like',content1)
+      .orWhere('message','like',content1)
+      .orWhere('user_name','like',content1)
+    }).fetchPage({
+      page: ctx.request.body.content.page,
+      pageSize: 10
+    });
+    for(var len = 0;len < results.length;len++){
+      logs[len] = results.models[len].attributes;
+      logs[len].created_at = results.models[len].attributes.created_at.format('yyyy-MM-dd hh:mm:ss');
+      logs[len].updated_at = results.models[len].attributes.updated_at.format('yyyy-MM-dd hh:mm:ss');
+    }
+    ctx.body = {logs};
   }
 });
 
