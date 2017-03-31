@@ -31,7 +31,7 @@ $(function (){
       let select_user = $('#user');
       select_user.html(""); //先清空下拉选项
       for(var item in user_obj){ //item是下标
-        let option = $('<option value='+ user_obj[item].id +'>'+ user_obj[item].name+'</option>');
+        let option = $('<option value='+ user_obj[item].id +'>'+ user_obj[item].name+'('+user_obj[item].email+')'+'</option>');
         option.appendTo(select_user); //添加节点
       }
       let origin_study = $(this).attr("data-study");

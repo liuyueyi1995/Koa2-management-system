@@ -397,6 +397,7 @@ router.get('/role_manage', async function (ctx, next) {
   for(var i = 0;i < origin_users.length;i++){
     users[i] = {
       "id": origin_users.models[i].attributes.id,
+      "email": origin_users.models[i].attributes.email,
       "name": origin_users.models[i].attributes.name
     }
   }

@@ -20,7 +20,7 @@ Raven.config('http://16843242dab34d0982fb8ead11779100:629aa8ee3dc747bc8b15036166
 app.use(convert(bodyparser));
 app.use(convert(json()));
 app.use(convert(logger()));
-app.use(convert(require('koa-static')(__dirname + '/public',{maxage:3600000})));
+app.use(convert(require('koa-static')(__dirname + '/public',{maxage:3600000}))); //增加了浏览器对静态资源的缓存
 app.keys = ['liuyueyi'];
 app.use(convert(session({
   store: mongoStore.create({
